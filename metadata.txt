@@ -1,0 +1,48 @@
+# This file contains metadata for your plugin.
+
+# This file should be included when you package your plugin.# Mandatory items:
+
+[general]
+name=Nimbo Earth
+email=contact@nimbo.earth
+author=Kermap
+qgisMinimumVersion=3.0
+description=This plugins allows you to access all Nimbo earth tile map services.
+about=You can access this plugin with your Nimbo account credentials or directly use your API key to access all Nimbo layers. You will find RGB, NDVI, Radar and Infrared layers ,from October 2019 to now, for Europe and Maghreb and USA since March 2022 and world since March 2023.  
+version=0.1
+repository=https://github.com/kermap-bzh/plugin-QGis-Nimbo-Earth
+tracker=https://github.com/kermap-bzh/plugin-QGis-Nimbo-Earth/issues
+
+# End of mandatory metadata
+
+# start of optional metadata
+
+# Category of the plugin: Raster, Vector, Database or Web
+category=raster
+
+hasProcessingProvider=no
+# Uncomment the following line and add your changelog:
+# changelog=
+
+# Tags are comma separated with spaces allowed
+tags=python, Nimbo Earth, Webservice, WMTS, NDVI, radar, infrared, natural 
+
+homepage=https://nimbo.earth/
+icon=assets/icon.png
+
+# experimental flag
+experimental=False
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False
+
+# Since QGIS 3.8, a comma separated list of plugins to be installed
+# (or upgraded) can be specified.
+# Check the documentation for more information.
+# plugin_dependencies=
+
+
+
+# If the plugin can run on QGIS Server.
+server=False
+
