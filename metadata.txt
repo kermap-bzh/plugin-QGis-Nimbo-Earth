@@ -9,7 +9,7 @@ author=Kermap
 qgisMinimumVersion=3.0
 description=This plugins allows you to access all Nimbo earth tile map services.
 about=You can access this plugin with your Nimbo account credentials or directly use your API key to access all Nimbo layers. You will find RGB, NDVI, Radar and Infrared layers ,from October 2019 to now, for Europe and Maghreb and USA since March 2022 and world since March 2023.  
-version=0.1
+version=0.2
 repository=https://github.com/kermap-bzh/plugin-QGis-Nimbo-Earth
 tracker=https://github.com/kermap-bzh/plugin-QGis-Nimbo-Earth/issues
 
