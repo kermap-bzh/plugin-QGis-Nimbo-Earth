@@ -96,7 +96,7 @@
          <bool>true</bool>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="key_tab">
          <property name="focusPolicy">
@@ -114,10 +114,55 @@
             <x>10</x>
             <y>40</y>
             <width>451</width>
-            <height>401</height>
+            <height>484</height>
            </rect>
           </property>
-          <layout class="QVBoxLayout" name="key_tab_vLayout" stretch="0,0">
+          <layout class="QVBoxLayout" name="key_tab_vLayout" stretch="0,0,0">
+           <item>
+            <widget class="QGroupBox" name="groupBox_3">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>90</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>90</height>
+              </size>
+             </property>
+             <property name="title">
+              <string>Try it !</string>
+             </property>
+             <widget class="QPushButton" name="free_pButton">
+              <property name="geometry">
+               <rect>
+                <x>220</x>
+                <y>40</y>
+                <width>200</width>
+                <height>25</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>March 2023 | Natural</string>
+              </property>
+             </widget>
+             <widget class="QLabel" name="key_label">
+              <property name="geometry">
+               <rect>
+                <x>10</x>
+                <y>45</y>
+                <width>151</width>
+                <height>17</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Add a free layer</string>
+              </property>
+             </widget>
+            </widget>
+           </item>
            <item>
             <widget class="QGroupBox" name="groupBox">
              <property name="minimumSize">
@@ -133,7 +178,7 @@
               </size>
              </property>
              <property name="title">
-              <string>Sign in to Nimbo to get your API key</string>
+              <string>For more layers, sign in to Nimbo to get your API key</string>
              </property>
              <widget class="QLabel" name="email_label">
               <property name="geometry">

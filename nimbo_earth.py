@@ -267,6 +267,8 @@ class NimboEarth:
                 self.dockwidget = NimboEarthDockWidget()
                 get_style(self.dockwidget)
 
+            self.dockwidget.free_pButton.clicked.connect(self.addFreeLayer)
+            
             # setting icons for links
             self.dockwidget.nimbo_icon_label.setPixmap(
                 QPixmap(":/plugins/nimbo_earth/assets/icon.png"))
@@ -505,3 +507,18 @@ class NimboEarth:
         else:
             self.iface.messageBar().pushMessage(
                 self.tr("Warning"), self.tr("Invalid layer: unable to add it to the project"), level=1, duration=5)
+
+    def addFreeLayer(self):
+        # re-initializing the layer
+        layer = XYZLayerModel()
+        layer.href = "type=xyz&url=https://prod-data.nimbo.earth/mapcache-free/tms/1.0.0/latest@kermap/{z}/{x}/{-y}.png"
+        layer.title = "March 2023 RGB"
+        flayer = QgsRasterLayer(layer.href, layer.title, "wms")
+        if flayer.isValid():
+            QgsProject().instance().addMapLayer(flayer)
+            self.iface.messageBar().pushMessage(
+                self.tr("Success"), self.tr("Layer added - wait until loading is complete"), level=3, duration=5)
+        else:
+            self.iface.messageBar().pushMessage(
+                self.tr("Warning"), self.tr("Invalid layer: unable to add it to the project"), level=1, duration=5)
+        
