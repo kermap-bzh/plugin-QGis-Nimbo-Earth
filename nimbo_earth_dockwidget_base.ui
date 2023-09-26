@@ -133,7 +133,7 @@
               </size>
              </property>
              <property name="title">
-              <string>Try it !</string>
+              <string>Try it!</string>
              </property>
              <widget class="QPushButton" name="free_pButton">
               <property name="geometry">
@@ -178,7 +178,7 @@
               </size>
              </property>
              <property name="title">
-              <string>For more layers, sign in to Nimbo to get your API key</string>
+              <string>More date, more color layer? Sign in now!</string>
              </property>
              <widget class="QLabel" name="email_label">
               <property name="geometry">

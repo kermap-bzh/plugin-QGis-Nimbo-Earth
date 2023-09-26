@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1">
+<TS version="2.1" language="fr">
 <context>
     <name>NimboEarth</name>
     <message>
@@ -31,7 +31,7 @@
     <message>
         <location filename="../nimbo_earth.py" line="374"/>
         <source>Your API Key is not valid</source>
-        <translation>Votre clé API n'est pas valide</translation>
+        <translation>Votre clé API n&apos;est pas valide</translation>
     </message>
     <message>
         <location filename="../nimbo_earth.py" line="501"/>
@@ -51,7 +51,7 @@
     <message>
         <location filename="../nimbo_earth.py" line="501"/>
         <source>Invalid layer: unable to add it to the project</source>
-        <translation>Couche invalide : impossible de l'ajouter au projet</translation>
+        <translation>Couche invalide : impossible de l&apos;ajouter au projet</translation>
     </message>
     <message>
         <location filename="../nimbo_earth.py" line="279"/>
@@ -61,7 +61,7 @@
     <message>
         <location filename="../nimbo_earth.py" line="345"/>
         <source>Incorrect email or password </source>
-        <translation>Email ou mot de passe incorrect</translation>
+        <translation>Email ou mot de passe incorrect </translation>
     </message>
     <message>
         <location filename="../nimbo_earth.py" line="276"/>
@@ -70,7 +70,7 @@
     </message>
     <message>
         <location filename="../nimbo_earth.py" line="282"/>
-        <source>Sign up to Nimbo</source>
+        <source>Sign up to Nimbo blabla</source>
         <translation>Créer un compte Nimbo</translation>
     </message>
     <message>
@@ -109,17 +109,17 @@
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="365"/>
         <source>Select composition </source>
-        <translation>Choisir une composition </translation>
+        <translation>Choisir vos options </translation>
     </message>
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="428"/>
         <source>Choose a month</source>
-        <translation>Choisir un mois </translation>
+        <translation>Choisir un mois</translation>
     </message>
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="403"/>
         <source>Choose a year</source>
-        <translation>Choisir une année </translation>
+        <translation>Choisir une année</translation>
     </message>
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="136"/>
@@ -129,12 +129,12 @@
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="148"/>
         <source>E-mail</source>
-        <translation>E-mail </translation>
+        <translation>E-mail</translation>
     </message>
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="161"/>
         <source>Password</source>
-        <translation>Mot de passe </translation>
+        <translation>Mot de passe</translation>
     </message>
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="206"/>
@@ -159,12 +159,13 @@
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="642"/>
         <source>&lt;a style=&quot;background-color: #629af0;color: white;padding: 1em 1.5em;position: relative;text-decoration: none;text-transform: uppercase;&quot;  href=&quot;https://kermap.com/a-propos/&quot;&gt;About Kermap&lt;/a&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>&lt;a style=&quot;background-color: #629af0;color: white;padding: 1em 1.5em;position: relative;text-decoration: none;text-transform: uppercase;&quot;  href=&quot;https://kermap.com/a-propos/&quot;&gt;About Kermap&lt;/a&gt;</translatorcomment>
+        <translation></translation>
     </message>
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="588"/>
         <source>&lt;a style=&quot;background-color: #629af0;color: white;padding: 1em 1.5em;position: relative;text-decoration: none;text-transform: uppercase;&quot;  href=&quot;https://nimbo.earth/discover&quot;&gt;About Nimbo&lt;/a&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="524"/>
@@ -174,7 +175,7 @@
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="246"/>
         <source>&lt;a style=&quot;color: #629af0;font-weight:bold;text-transform: uppercase;&quot; href=&quot;https://maps.nimbo.earth/freeregister&quot;&gt;Sign up to Nimbo&lt;/a&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;a style=&quot;color: #629af0;font-weight:bold;;&quot; href=&quot;https://maps.nimbo.earth/freeregister&quot;&gt;Créer un compte Nimbo en quelques clics&lt;/a&gt;</translation>
     </message>
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="304"/>
@@ -184,7 +185,27 @@
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="87"/>
         <source>remaining Geocredits</source>
-        <translation >Géocrédits restants</translation>
+        <translation>Géocrédits restants</translation>
+    </message>
+    <message>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="161"/>
+        <source>Add a free layer</source>
+        <translation>Ajouter une couche</translation>
+    </message>
+    <message>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="181"/>
+        <source>More date, more color layer? Sign in now!</source>
+        <translation>Accédez à plusieurs dates et d&apos;autres couches !</translation>
+    </message>
+    <message>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="136"/>
+        <source>Try it!</source>
+        <translation>Essayez la démo !</translation>
+    </message>
+    <message>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="148"/>
+        <source>March 2023 | Natural</source>
+        <translation>Mars 2023 | Naturel</translation>
     </message>
 </context>
 </TS>
