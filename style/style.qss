@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 /*-----QWidget-----*/
 QWidget
 {
-	background-color: #49515c; 
+	background-color: #20242d; 
 	color: #fff;
 
 }
@@ -33,7 +33,7 @@ QWidget
 QLabel 
 {
 	color: white    ;
-	background-color: #49515c;
+	background-color: #20242d;
     margin-top:1px;
 	margin-bottom:1px;
 
@@ -111,10 +111,15 @@ QListView::item:!selected:hover
 }
 
 
-
 /*-----QTabWidget-----*/
 QTabBar::tab:!selected {
     color:gray;
+}
+
+
+/*-----QPushButton-----*/
+QPushButton{
+    background-color: #3d5372;
 }
 
 
