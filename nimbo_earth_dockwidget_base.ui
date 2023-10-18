@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>736</height>
+    <height>850</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,20 +19,166 @@
   <property name="minimumSize">
    <size>
     <width>500</width>
-    <height>425</height>
+    <height>850</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>960</width>
-    <height>816</height>
+    <width>500</width>
+    <height>850</height>
    </size>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
   </property>
   <property name="windowTitle">
    <string/>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
+   <property name="maximumSize">
+    <size>
+     <width>500</width>
+     <height>831</height>
+    </size>
+   </property>
    <layout class="QGridLayout" name="gridLayout">
+    <item row="1" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout_kn">
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>30</width>
+          <height>50</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="nimbo_icon_label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>45</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap>icon.png</pixmap>
+        </property>
+        <property name="scaledContents">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="nimbo_label">
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://nimbo.earth/discover&quot;&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline; color:#ffffff;&quot;&gt;About Nimbo&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::RichText</enum>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="openExternalLinks">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>30</width>
+          <height>50</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="kermap_icon_label">
+        <property name="minimumSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>40</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap>kermapLogo.png</pixmap>
+        </property>
+        <property name="scaledContents">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="kermap_label">
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://kermap.com/a-propos/&quot;&gt;&lt;span style=&quot; font-weight:600; color:#ffffff;&quot;&gt;About Kermap&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::RichText</enum>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="openExternalLinks">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>50</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
     <item row="0" column="0">
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
@@ -45,7 +191,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Welcome to Nimbo Earth TMS</string>
+           <string>Welcome to Nimbo Earth Basemaps TMS</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -95,8 +241,14 @@
         <property name="enabled">
          <bool>true</bool>
         </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>728</height>
+         </size>
+        </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="key_tab">
          <property name="focusPolicy">
@@ -108,206 +260,301 @@
          <attribute name="title">
           <string>API key validation</string>
          </attribute>
-         <widget class="QWidget" name="verticalLayoutWidget_2">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>40</y>
-            <width>451</width>
-            <height>401</height>
-           </rect>
-          </property>
-          <layout class="QVBoxLayout" name="key_tab_vLayout" stretch="0,0">
-           <item>
-            <widget class="QGroupBox" name="groupBox">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>200</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>200</height>
-              </size>
-             </property>
-             <property name="title">
-              <string>Sign in to Nimbo to get your API key</string>
-             </property>
-             <widget class="QLabel" name="email_label">
-              <property name="geometry">
-               <rect>
-                <x>10</x>
-                <y>45</y>
-                <width>110</width>
-                <height>17</height>
-               </rect>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <property name="topMargin">
+             <number>30</number>
+            </property>
+            <property name="bottomMargin">
+             <number>20</number>
+            </property>
+            <property name="verticalSpacing">
+             <number>30</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QGroupBox" name="groupBox_3">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>90</height>
+               </size>
               </property>
-              <property name="text">
-               <string>E-mail</string>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>90</height>
+               </size>
               </property>
+              <property name="title">
+               <string>Try our cloud-free basemap service</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <widget class="QWidget" name="layoutWidget">
+               <property name="geometry">
+                <rect>
+                 <x>20</x>
+                 <y>40</y>
+                 <width>411</width>
+                 <height>27</height>
+                </rect>
+               </property>
+               <layout class="QHBoxLayout" name="horizontalLayout_6">
+                <item>
+                 <widget class="QLabel" name="key_label">
+                  <property name="text">
+                   <string>Try now with</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="free_pButton">
+                  <property name="cursor">
+                   <cursorShape>PointingHandCursor</cursorShape>
+                  </property>
+                  <property name="text">
+                   <string>March 2023 | Natural</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
              </widget>
-             <widget class="QLabel" name="password_label">
-              <property name="geometry">
-               <rect>
-                <x>10</x>
-                <y>90</y>
-                <width>110</width>
-                <height>17</height>
-               </rect>
+            </item>
+            <item row="1" column="0">
+             <widget class="QGroupBox" name="groupBox_5">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>160</height>
+               </size>
               </property>
-              <property name="text">
-               <string>Password</string>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>160</height>
+               </size>
               </property>
+              <property name="title">
+               <string>Create you account for free access to all Nimbo Services</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <widget class="QLabel" name="key_label_2">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>40</y>
+                 <width>431</width>
+                 <height>51</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span&gt;Create your Nimbo account to load any &lt;br&gt;monthly basemap into QGIS, from Oct. 2019 to present. &lt;br&gt;4 color layers available.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+              <widget class="QPushButton" name="subscribe_pButton">
+               <property name="geometry">
+                <rect>
+                 <x>120</x>
+                 <y>110</y>
+                 <width>200</width>
+                 <height>25</height>
+                </rect>
+               </property>
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
+               </property>
+               <property name="text">
+                <string>Sign up to Nimbo</string>
+               </property>
+              </widget>
              </widget>
-             <widget class="QLineEdit" name="email_lineEdit">
-              <property name="geometry">
-               <rect>
-                <x>120</x>
-                <y>40</y>
-                <width>300</width>
-                <height>25</height>
-               </rect>
+            </item>
+            <item row="2" column="0">
+             <widget class="QGroupBox" name="groupBox">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>320</height>
+               </size>
               </property>
-              <property name="inputMethodHints">
-               <set>Qt::ImhEmailCharactersOnly</set>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>330</height>
+               </size>
               </property>
+              <property name="title">
+               <string>Already have a Nimbo account?</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="flat">
+               <bool>false</bool>
+              </property>
+              <widget class="QLabel" name="email_label">
+               <property name="geometry">
+                <rect>
+                 <x>19</x>
+                 <y>55</y>
+                 <width>101</width>
+                 <height>20</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>E-mail</string>
+               </property>
+              </widget>
+              <widget class="QLabel" name="password_label">
+               <property name="geometry">
+                <rect>
+                 <x>19</x>
+                 <y>90</y>
+                 <width>101</width>
+                 <height>20</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Password</string>
+               </property>
+              </widget>
+              <widget class="QLineEdit" name="email_lineEdit">
+               <property name="geometry">
+                <rect>
+                 <x>120</x>
+                 <y>50</y>
+                 <width>301</width>
+                 <height>25</height>
+                </rect>
+               </property>
+               <property name="inputMethodHints">
+                <set>Qt::ImhEmailCharactersOnly</set>
+               </property>
+              </widget>
+              <widget class="QLineEdit" name="password_lineEdit">
+               <property name="geometry">
+                <rect>
+                 <x>120</x>
+                 <y>90</y>
+                 <width>271</width>
+                 <height>25</height>
+                </rect>
+               </property>
+               <property name="inputMethodHints">
+                <set>Qt::ImhSensitiveData</set>
+               </property>
+              </widget>
+              <widget class="QPushButton" name="login_pButton">
+               <property name="geometry">
+                <rect>
+                 <x>120</x>
+                 <y>130</y>
+                 <width>200</width>
+                 <height>25</height>
+                </rect>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
+               </property>
+               <property name="text">
+                <string>Login</string>
+               </property>
+              </widget>
+              <widget class="QPushButton" name="eye_pButton">
+               <property name="geometry">
+                <rect>
+                 <x>400</x>
+                 <y>90</y>
+                 <width>26</width>
+                 <height>24</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+              <widget class="QLineEdit" name="key_input_lineEdit">
+               <property name="geometry">
+                <rect>
+                 <x>120</x>
+                 <y>230</y>
+                 <width>301</width>
+                 <height>25</height>
+                </rect>
+               </property>
+              </widget>
+              <widget class="QPushButton" name="key_pButton">
+               <property name="geometry">
+                <rect>
+                 <x>120</x>
+                 <y>270</y>
+                 <width>200</width>
+                 <height>25</height>
+                </rect>
+               </property>
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
+               </property>
+               <property name="text">
+                <string>Validate your key</string>
+               </property>
+              </widget>
+              <widget class="QLabel" name="key_label_3">
+               <property name="geometry">
+                <rect>
+                 <x>19</x>
+                 <y>230</y>
+                 <width>101</width>
+                 <height>20</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>API key</string>
+               </property>
+              </widget>
+              <widget class="QLabel" name="key_label_4">
+               <property name="geometry">
+                <rect>
+                 <x>120</x>
+                 <y>170</y>
+                 <width>201</width>
+                 <height>41</height>
+                </rect>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>13</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Or</string>
+               </property>
+               <property name="scaledContents">
+                <bool>false</bool>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
              </widget>
-             <widget class="QLineEdit" name="password_lineEdit">
-              <property name="geometry">
-               <rect>
-                <x>120</x>
-                <y>85</y>
-                <width>271</width>
-                <height>25</height>
-               </rect>
-              </property>
-              <property name="inputMethodHints">
-               <set>Qt::ImhSensitiveData</set>
-              </property>
-             </widget>
-             <widget class="QPushButton" name="login_pButton">
-              <property name="geometry">
-               <rect>
-                <x>120</x>
-                <y>160</y>
-                <width>200</width>
-                <height>25</height>
-               </rect>
-              </property>
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Login</string>
-              </property>
-             </widget>
-             <widget class="QPushButton" name="eye_pButton">
-              <property name="geometry">
-               <rect>
-                <x>394</x>
-                <y>85</y>
-                <width>26</width>
-                <height>24</height>
-               </rect>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-             <widget class="QLabel" name="signup_label">
-              <property name="geometry">
-               <rect>
-                <x>10</x>
-                <y>125</y>
-                <width>300</width>
-                <height>20</height>
-               </rect>
-              </property>
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="font">
-               <font>
-                <underline>false</underline>
-               </font>
-              </property>
-              <property name="cursor">
-               <cursorShape>PointingHandCursor</cursorShape>
-              </property>
-              <property name="text">
-               <string>&lt;a style=&quot;color: #629af0;font-weight:bold;text-transform: uppercase;&quot; href=&quot;https://maps.nimbo.earth/freeregister&quot;&gt;Sign up to Nimbo&lt;/a&gt;</string>
-              </property>
-              <property name="openExternalLinks">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </widget>
-           </item>
-           <item>
-            <widget class="QGroupBox" name="groupBox_3">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>135</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>135</height>
-              </size>
-             </property>
-             <property name="title">
-              <string>Or enter your API key</string>
-             </property>
-             <widget class="QLineEdit" name="key_input_lineEdit">
-              <property name="geometry">
-               <rect>
-                <x>120</x>
-                <y>40</y>
-                <width>300</width>
-                <height>25</height>
-               </rect>
-              </property>
-             </widget>
-             <widget class="QPushButton" name="key_pButton">
-              <property name="geometry">
-               <rect>
-                <x>120</x>
-                <y>85</y>
-                <width>200</width>
-                <height>25</height>
-               </rect>
-              </property>
-              <property name="text">
-               <string>Validate your key</string>
-              </property>
-             </widget>
-             <widget class="QLabel" name="key_label">
-              <property name="geometry">
-               <rect>
-                <x>10</x>
-                <y>45</y>
-                <width>110</width>
-                <height>17</height>
-               </rect>
-              </property>
-              <property name="text">
-               <string>API key:</string>
-              </property>
-             </widget>
-            </widget>
-           </item>
-          </layout>
-         </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
         </widget>
         <widget class="QWidget" name="tms_tab">
          <attribute name="title">
@@ -481,6 +728,9 @@
              <property name="title">
               <string>Or choose from the list</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
              <widget class="QListWidget" name="layer_listWidget">
               <property name="geometry">
                <rect>
@@ -530,137 +780,6 @@
          </widget>
         </widget>
        </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="1" column="0">
-     <layout class="QHBoxLayout" name="horizontalLayout_kn">
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>30</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="nimbo_icon_label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>50</width>
-          <height>45</height>
-         </size>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="pixmap">
-         <pixmap>icon.png</pixmap>
-        </property>
-        <property name="scaledContents">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="nimbo_label">
-        <property name="cursor">
-         <cursorShape>PointingHandCursor</cursorShape>
-        </property>
-        <property name="text">
-         <string>&lt;a style=&quot;background-color: #629af0;color: white;padding: 1em 1.5em;position: relative;text-decoration: none;text-transform: uppercase;&quot;  href=&quot;https://nimbo.earth/discover&quot;&gt;About Nimbo&lt;/a&gt;</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="openExternalLinks">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>30</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="kermap_icon_label">
-        <property name="minimumSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>40</width>
-          <height>49</height>
-         </size>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="pixmap">
-         <pixmap>logoKERMAP.png</pixmap>
-        </property>
-        <property name="scaledContents">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="kermap_label">
-        <property name="cursor">
-         <cursorShape>PointingHandCursor</cursorShape>
-        </property>
-        <property name="text">
-         <string>&lt;a style=&quot;background-color: #629af0;color: white;padding: 1em 1.5em;position: relative;text-decoration: none;text-transform: uppercase;&quot;  href=&quot;https://kermap.com/a-propos/&quot;&gt;About Kermap&lt;/a&gt;</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="openExternalLinks">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </item>

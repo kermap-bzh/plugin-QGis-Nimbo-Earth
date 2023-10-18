@@ -267,21 +267,24 @@ class NimboEarth:
                 self.dockwidget = NimboEarthDockWidget()
                 get_style(self.dockwidget)
 
+            # setting free basemap button event
+            self.dockwidget.free_pButton.clicked.connect(self.addFreeLayer)
+            
+            # setting redirect button to nimbo subscription page
+            self.dockwidget.subscribe_pButton.clicked.connect(lambda: webbrowser.open('https://maps.nimbo.earth/freeregister'))
+            
             # setting icons for links
             self.dockwidget.nimbo_icon_label.setPixmap(
                 QPixmap(":/plugins/nimbo_earth/assets/icon.png"))
             self.dockwidget.kermap_icon_label.setPixmap(
-                QPixmap(":/plugins/nimbo_earth/assets/logoKERMAP.jpg"))
+                QPixmap(":/plugins/nimbo_earth/assets/kermapLogo.png"))
             # setting text for links
             self.dockwidget.nimbo_label.setText(
-                '<a style="color: #629af0;font-weight:bold;" href="https://nimbo.earth">{0}</a>'.format(self.tr("About Nimbo")))
+                '<a style="color: white;font-weight:bold;text-decoration: none;" href="https://nimbo.earth">{0}</a>'.format(self.tr("About Nimbo")))
             self.dockwidget.nimbo_label.setOpenExternalLinks(True)
             self.dockwidget.kermap_label.setText(
-                '<a style="color: #629af0;font-weight:bold" href="https://kermap.com/a-propos/">{0}</a>'.format(self.tr("About Kermap")))
+                '<a style="color: white;font-weight:bold; text-decoration: none;" href="https://kermap.com/a-propos/">{0}</a>'.format(self.tr("About Kermap")))
             self.dockwidget.kermap_label.setOpenExternalLinks(True)
-            self.dockwidget.signup_label.setText(
-                '<a style="color: #629af0;font-weight:bold" href="https://maps.nimbo.earth/freeregister">{0}</a>'.format(self.tr("Sign up to Nimbo")))
-            self.dockwidget.signup_label.setOpenExternalLinks(True)
             # disabling second tab widget
             self.dockwidget.tabWidget.setTabEnabled(1, False)
             # hiding geocredit label until login
@@ -316,7 +319,7 @@ class NimboEarth:
             # TODO: fix to allow choice of dock location
             self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockwidget)
             self.dockwidget.show()
-
+    
     def show_password(self):
         self.dockwidget.password_lineEdit.setEchoMode(QLineEdit.Normal)
         self.dockwidget.eye_pButton.setIcon(
@@ -361,11 +364,13 @@ class NimboEarth:
         """checks if the api key is valid"""
         # getting the base service url and adding the api key to it
         request_url = SERVICE_URL + api_key
+        print(SERVICE_URL + api_key)
 
+        headers = {'User-Agent': "QGIS Nimbo plugin"}
         # making a request with the url to see if the response status is 200 or not
         # if status is 200 then update the layer selection with the list of urls availables
         # else raising exceptions
-        response = requests.get(request_url) 
+        response = requests.get(request_url, headers=headers) 
         if response.status_code == 200:
             self.get_geocredits(response)
             xml_file = response.content
@@ -505,3 +510,18 @@ class NimboEarth:
         else:
             self.iface.messageBar().pushMessage(
                 self.tr("Warning"), self.tr("Invalid layer: unable to add it to the project"), level=1, duration=5)
+
+    def addFreeLayer(self):
+        # re-initializing the layer
+        layer = XYZLayerModel()
+        layer.href = "type=xyz&url=https://prod-data.nimbo.earth/mapcache-free/tms/1.0.0/latest@kermap/{z}/{x}/{-y}.png"
+        layer.title = "March 2023 RGB"
+        flayer = QgsRasterLayer(layer.href, layer.title, "wms")
+        if flayer.isValid():
+            QgsProject().instance().addMapLayer(flayer)
+            self.iface.messageBar().pushMessage(
+                self.tr("Success"), self.tr("Layer added - wait until loading is complete"), level=3, duration=5)
+        else:
+            self.iface.messageBar().pushMessage(
+                self.tr("Warning"), self.tr("Invalid layer: unable to add it to the project"), level=1, duration=5)
+        
