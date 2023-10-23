@@ -110,7 +110,7 @@
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="290"/>
         <source>Try our cloud-free basemap service</source>
-        <translation>Essayez nos cartes mondiales sans nuages</translation>
+        <translation>Découvez nos cartes du monde sans nuages</translation>
     </message>
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="308"/>
@@ -125,12 +125,12 @@
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="341"/>
         <source>Create you account for free access to all Nimbo Services</source>
-        <translation>Accédez gratuitement à tous les services de Nimbo</translation>
+        <translation>Accédez à tous les services Nimbo</translation>
     </message>
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="356"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span&gt;Create your Nimbo account to load any &lt;br&gt;monthly basemap into QGIS, from Oct. 2019 to present. &lt;br&gt;4 color layers available.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span&gt;Créez votre compte Nimbo pour charger les cartes mensuelles &lt;br&gt; souhaitées dans QGIS, d&apos;octobre 2019 à aujourd&apos;hui. &lt;br&gt;4 couches de couleurs disponibles.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span&gt;Créez votre compte Nimbo pour charger les cartes mensuelles &lt;br&gt; souhaitées dans QGIS, d&apos;octobre 2019 à aujourd&apos;hui. &lt;br&gt;4 compositions disponibles.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="375"/>
