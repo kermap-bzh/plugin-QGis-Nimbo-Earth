@@ -307,7 +307,7 @@ class Ui_NimboEarthDockWidgetBase(object):
         self.gc_label.setText(_translate("NimboEarthDockWidgetBase", "remaining Geocredits"))
         self.groupBox_3.setTitle(_translate("NimboEarthDockWidgetBase", "Try our cloud-free basemap service"))
         self.key_label.setText(_translate("NimboEarthDockWidgetBase", "Try now with"))
-        self.free_pButton.setText(_translate("NimboEarthDockWidgetBase", "March 2023 | Natural"))
+        self.free_pButton.setText(_translate("NimboEarthDockWidgetBase", "June 2023 | Natural"))
         self.groupBox_5.setTitle(_translate("NimboEarthDockWidgetBase", "Create you account for free access to all Nimbo Services"))
         self.key_label_2.setText(_translate("NimboEarthDockWidgetBase", "<html><head/><body><p><span>Create your Nimbo account to load any <br>monthly basemap into QGIS, from Oct. 2019 to present. <br>4 color layers available.</span></p></body></html>"))
         self.subscribe_pButton.setText(_translate("NimboEarthDockWidgetBase", "Sign up to Nimbo"))

@@ -119,8 +119,8 @@
     </message>
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="308"/>
-        <source>March 2023 | Natural</source>
-        <translation>Mars 2023 | Naturel</translation>
+        <source>June 2023 | Natural</source>
+        <translation>Juin 2023 | Naturel</translation>
     </message>
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="341"/>

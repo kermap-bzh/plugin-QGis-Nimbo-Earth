@@ -515,7 +515,7 @@ class NimboEarth:
         # re-initializing the layer
         layer = XYZLayerModel()
         layer.href = "type=xyz&url=https://prod-data.nimbo.earth/mapcache-free/tms/1.0.0/latest@kermap/{z}/{x}/{-y}.png"
-        layer.title = "March 2023 RGB"
+        layer.title = "June 2023 RGB"
         flayer = QgsRasterLayer(layer.href, layer.title, "wms")
         if flayer.isValid():
             QgsProject().instance().addMapLayer(flayer)
