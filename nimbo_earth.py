@@ -210,7 +210,6 @@ class NimboEarth:
         abs_path = os.path.dirname(os.path.abspath(__file__))
         help_path = os.path.join(abs_path, 'help/build/html/index.html')
         help_file = 'file:///'+help_path
-        print(help_file)
         QDesktopServices.openUrl(QUrl(help_file))
     # --------------------------------------------------------------------------
 
@@ -364,7 +363,6 @@ class NimboEarth:
         """checks if the api key is valid"""
         # getting the base service url and adding the api key to it
         request_url = SERVICE_URL + api_key
-        print(SERVICE_URL + api_key)
 
         headers = {'User-Agent': "QGIS Nimbo plugin"}
         # making a request with the url to see if the response status is 200 or not

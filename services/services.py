@@ -77,6 +77,8 @@ class Services:
             data = rec.href.split('/')[6].split('@')[0].split('_')
             # adding the layer as XYZLayer to tile maps
             if ('water' not in data) and ('rasterdem' not in data) and ('copernicus' not in data):
+                if int(data[1]) < 10 :
+                    data[1] = '0' + data[1]
                 self.tile_maps.layers.append(XYZLayerModel(
                     rec.title, rec.srs, rec.profile, rec.href, year=data[0], month=data[1], composition=data[2]))
                 self.tile_maps.layers.sort(key=attrgetter('year','month'))
@@ -84,23 +86,23 @@ class Services:
         return self.tile_maps
 
     def get_month_name(self, month):
-        if month == "1":
+        if month == "01" or month == "1":
             return "January"
-        elif month == "2":
+        elif month == "02" or month == "2":
             return"February"
-        elif month == "3":
+        elif month == "03" or month == "3":
             return "March"
-        elif month == "4":
+        elif month == "04" or month == "4":
             return "April"
-        elif month == "5":
+        elif month == "05" or month == "5":
             return "May"
-        elif month == "6":
+        elif month == "06" or month == "6":
             return "June"
-        elif month == "7":
+        elif month == "07" or month == "7":
             return "July"
-        elif month == "8":
+        elif month == "08" or month == "8":
             return "August"
-        elif month == "9":
+        elif month == "09" or month == "9":
             return "September"
         elif month == "10":
             return "October"
