@@ -282,7 +282,7 @@ class NimboEarth:
                 '<a style="color: white;font-weight:bold;text-decoration: none;" href="https://nimbo.earth">{0}</a>'.format(self.tr("About Nimbo")))
             self.dockwidget.nimbo_label.setOpenExternalLinks(True)
             self.dockwidget.kermap_label.setText(
-                '<a style="color: white;font-weight:bold; text-decoration: none;" href="https://kermap.com/a-propos/">{0}</a>'.format(self.tr("About Kermap")))
+                '<a style="color: white;font-weight:bold; text-decoration: none;" href="https://kermap.com/en/our-story/">{0}</a>'.format(self.tr("About Kermap")))
             self.dockwidget.kermap_label.setOpenExternalLinks(True)
             # disabling second tab widget
             self.dockwidget.tabWidget.setTabEnabled(1, False)

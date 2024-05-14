@@ -40,9 +40,9 @@ class Ui_NimboEarthDockWidgetBase(object):
         sizePolicy.setHeightForWidth(self.nimbo_icon_label.sizePolicy().hasHeightForWidth())
         self.nimbo_icon_label.setSizePolicy(sizePolicy)
         self.nimbo_icon_label.setMinimumSize(QtCore.QSize(20, 20))
-        self.nimbo_icon_label.setMaximumSize(QtCore.QSize(50, 45))
+        self.nimbo_icon_label.setMaximumSize(QtCore.QSize(45, 45))
         self.nimbo_icon_label.setText("")
-        self.nimbo_icon_label.setPixmap(QtGui.QPixmap("/home/guillaume/Documents/Depot/plugin-QGis-Nimbo-Earth/icon.png"))
+        self.nimbo_icon_label.setPixmap(QtGui.QPixmap("/home/guillaume/Documents/Depot/plugin-QGis-Nimbo-Earth/assets/nimboIcon.png"))
         self.nimbo_icon_label.setScaledContents(True)
         self.nimbo_icon_label.setObjectName("nimbo_icon_label")
         self.horizontalLayout_kn.addWidget(self.nimbo_icon_label)
@@ -301,8 +301,8 @@ class Ui_NimboEarthDockWidgetBase(object):
 
     def retranslateUi(self, NimboEarthDockWidgetBase):
         _translate = QtCore.QCoreApplication.translate
-        self.nimbo_label.setText(_translate("NimboEarthDockWidgetBase", "<html><head/><body><p><a href=\"https://nimbo.earth/discover\"><span style=\" font-weight:600; text-decoration: underline; color:#ffffff;\">About Nimbo</span></a></p></body></html>"))
-        self.kermap_label.setText(_translate("NimboEarthDockWidgetBase", "<html><head/><body><p><a href=\"https://kermap.com/a-propos/\"><span style=\" font-weight:600; color:#ffffff;\">About Kermap</span></a></p></body></html>"))
+        self.nimbo_label.setText(_translate("NimboEarthDockWidgetBase", "<html><head/><body><p><a href=\"https://nimbo.earth/\"><span style=\" font-weight:600; text-decoration: underline; color:#ffffff;\">About Nimbo</span></a></p></body></html>"))
+        self.kermap_label.setText(_translate("NimboEarthDockWidgetBase", "<html><head/><body><p><a href=\"https://kermap.com/en/our-story/\"><span style=\" font-weight:600; color:#ffffff;\">About Kermap</span></a></p></body></html>"))
         self.title_label.setText(_translate("NimboEarthDockWidgetBase", "Welcome to Nimbo Earth Basemaps TMS"))
         self.gc_label.setText(_translate("NimboEarthDockWidgetBase", "remaining Geocredits"))
         self.groupBox_3.setTitle(_translate("NimboEarthDockWidgetBase", "Try our cloud-free basemap service"))
@@ -320,7 +320,7 @@ class Ui_NimboEarthDockWidgetBase(object):
         self.key_label_4.setText(_translate("NimboEarthDockWidgetBase", "Or"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.key_tab), _translate("NimboEarthDockWidgetBase", "API key validation"))
         self.groupBox_2.setTitle(_translate("NimboEarthDockWidgetBase", "Select your parameters"))
-        self.composition_label.setText(_translate("NimboEarthDockWidgetBase", "Select composition "))
+        self.composition_label.setText(_translate("NimboEarthDockWidgetBase", "Select composition"))
         self.year_selector_label.setText(_translate("NimboEarthDockWidgetBase", "Choose a year"))
         self.month_selector_label.setText(_translate("NimboEarthDockWidgetBase", "Choose a month"))
         self.add_map_cbox_pButton.setText(_translate("NimboEarthDockWidgetBase", "Add layer"))

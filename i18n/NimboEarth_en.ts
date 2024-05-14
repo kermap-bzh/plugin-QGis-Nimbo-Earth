@@ -83,12 +83,12 @@
     <name>NimboEarthDockWidgetBase</name>
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="97"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://nimbo.earth/discover&quot;&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline; color:#ffffff;&quot;&gt;About Nimbo&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://nimbo.earth/discover&quot;&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline; color:#ffffff;&quot;&gt;À propos de Nimbo&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://nimbo.earth/&quot;&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline; color:#ffffff;&quot;&gt;About Nimbo&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://nimbo.earth/&quot;&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline; color:#ffffff;&quot;&gt;À propos de Nimbo&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="154"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://kermap.com/a-propos/&quot;&gt;&lt;span style=&quot; font-weight:600; color:#ffffff;&quot;&gt;About Kermap&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://kermap.com/en/our-story/&quot;&gt;&lt;span style=&quot; font-weight:600; color:#ffffff;&quot;&gt;About Kermap&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translatorcomment>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://kermap.com/a-propos/&quot;&gt;&lt;span style=&quot; font-weight:600; color:#ffffff;&quot;&gt;À propos de Kermap&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translatorcomment>
         <translation></translation>
     </message>
@@ -185,7 +185,7 @@
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="612"/>
         <source>Select composition</source>
-        <translation>Choisir vos options</translation>
+        <translation>Choisir une composition</translation>
     </message>
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="650"/>
