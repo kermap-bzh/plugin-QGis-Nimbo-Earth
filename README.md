@@ -30,4 +30,4 @@ All of Nimbo's monthly layers - RGB, NDVI, Radar and Infrared - will then be ava
 - From March 2022 to present : All of the above + the USA
 - From February 2023 to present : Global coverage
 
-*(Please not that radar layer does not provide extensive global coverage as of 2022, as one of Sentinel-1 constellation's satellite went out of service by end-2021-early 2022)*
+*(Please note that radar layer does not provide extensive global coverage as of 2022, as one of Sentinel-1 constellation's satellite went out of service by end-2021-early 2022)*
