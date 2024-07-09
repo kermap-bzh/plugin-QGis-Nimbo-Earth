@@ -118,7 +118,7 @@
         <translation>Essayez maintenant avec</translation>
     </message>
     <message>
-        <location filename="../nimbo_earth_dockwidget_base.ui" line="308"/>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="318"/>
         <source>June 2023 | Natural</source>
         <translation>Juin 2023 | Naturel</translation>
     </message>
@@ -138,74 +138,94 @@
         <translation>Créer un compte Nimbo</translation>
     </message>
     <message>
-        <location filename="../nimbo_earth_dockwidget_base.ui" line="395"/>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="388"/>
+        <source>See offers</source>
+        <translation>Offres pro</translation>
+    </message>
+    <message>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="411"/>
         <source>Already have a Nimbo account?</source>
         <translation>Déjà membre ?</translation>
     </message>
     <message>
-        <location filename="../nimbo_earth_dockwidget_base.ui" line="413"/>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="429"/>
         <source>E-mail</source>
         <translation>E-mail</translation>
     </message>
     <message>
-        <location filename="../nimbo_earth_dockwidget_base.ui" line="426"/>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="442"/>
         <source>Password</source>
         <translation>Mot de passe</translation>
     </message>
     <message>
-        <location filename="../nimbo_earth_dockwidget_base.ui" line="474"/>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="490"/>
         <source>Login</source>
         <translation>Connexion</translation>
     </message>
     <message>
-        <location filename="../nimbo_earth_dockwidget_base.ui" line="513"/>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="529"/>
         <source>Validate your key</source>
         <translation>Connexion</translation>
     </message>
     <message>
-        <location filename="../nimbo_earth_dockwidget_base.ui" line="526"/>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="542"/>
         <source>API Key</source>
         <translation>Clé API</translation>
     </message>
     <message>
-        <location filename="../nimbo_earth_dockwidget_base.ui" line="544"/>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="560"/>
         <source>Or</source>
         <translation>Ou</translation>
     </message>
     <message>
-        <location filename="../nimbo_earth_dockwidget_base.ui" line="561"/>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="577"/>
         <source>Layer selector</source>
         <translation>Sélection de la couche</translation>
     </message>
     <message>
-        <location filename="../nimbo_earth_dockwidget_base.ui" line="594"/>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="610"/>
         <source>Select your parameters</source>
         <translation>Choisir vos options</translation>
     </message>
     <message>
-        <location filename="../nimbo_earth_dockwidget_base.ui" line="612"/>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="628"/>
         <source>Select composition</source>
         <translation>Choisir une composition</translation>
     </message>
     <message>
-        <location filename="../nimbo_earth_dockwidget_base.ui" line="650"/>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="666"/>
         <source>Choose a year</source>
         <translation>Choisir une année</translation>
     </message>
     <message>
-        <location filename="../nimbo_earth_dockwidget_base.ui" line="675"/>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="691"/>
         <source>Choose a month</source>
         <translation>Choisir un mois</translation>
     </message>
     <message>
-        <location filename="../nimbo_earth_dockwidget_base.ui" line="709"/>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="745"/>
+        <source>Or choose from the list</source>
+        <translation>Ou choisir depuis la liste</translation>
+    </message>
+    <message>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="790"/>
         <source>Add layer</source>
         <translation>Ajouter une couche</translation>
     </message>
     <message>
-        <location filename="../nimbo_earth_dockwidget_base.ui" line="729"/>
-        <source>Or choose from the list</source>
-        <translation>Ou choisir depuis la liste</translation>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="810"/>
+        <source>Professional plans</source>
+        <translation>Offres pro</translation>
+    </message>
+    <message>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="837"/>
+        <source>Discover offers</source>
+        <translation>Découvrir nos offres</translation>
+    </message>
+    <message>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="850"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Learn more about Nimbo geocredit plans and advanced &lt;br&gt;geospatial applications: basemap integration, multispectral &lt;br&gt; basemap download or real-time monitoring.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Découvrez les offres Nimbo pour obtenir plus de géocrédits &lt;br&gt;ou bénéficier d&apos;applications avancées : intégration de &lt;br&gt;basemaps, téléchargement de basemaps multispectrales &lt;br&gt;ou suivi en quasi temps réel.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 </TS>

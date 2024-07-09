@@ -272,6 +272,10 @@ class NimboEarth:
             # setting redirect button to nimbo subscription page
             self.dockwidget.subscribe_pButton.clicked.connect(lambda: webbrowser.open('https://maps.nimbo.earth/freeregister'))
             
+            # setting redirect button to nimbo pricing page
+            self.dockwidget.pricing_pButton.clicked.connect(lambda: webbrowser.open('https://nimbo.earth/pricing/'))
+            self.dockwidget.pricing_link.clicked.connect(lambda: webbrowser.open('https://nimbo.earth/pricing/'))
+            
             # setting icons for links
             self.dockwidget.nimbo_icon_label.setPixmap(
                 QPixmap(":/plugins/nimbo_earth/assets/icon.png"))
