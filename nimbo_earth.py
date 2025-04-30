@@ -12,7 +12,7 @@
         email                : contact@nimbo.earth
  ***************************************************************************/
 
-/***************************************************************************
+ ***************************************************************************
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -431,6 +431,7 @@ class NimboEarth:
                 self.dockwidget.layer_listWidget.addItem(self.services.get_month_name(layer.month) + ' ' + layer.year + ' '+self.services.get_composition_name(layer.composition))
             else:
                 self.dockwidget.layer_listWidget.addItem(layer.title)
+        self.reverse_sort_layers()
             
 
     def month_selection(self):
@@ -448,6 +449,21 @@ class NimboEarth:
     def clear_list_selection(self):
         self.dockwidget.layer_listWidget.clearSelection()
 
+    def reverse_sort_layers(self):
+        # Get all items from the list widget
+        items = []
+        for i in range(self.dockwidget.layer_listWidget.count()):
+            items.append(self.dockwidget.layer_listWidget.item(i).text())
+
+        # Sort items in reverse order
+        items = list(reversed(items))
+        
+        # Clear the list widget
+        self.dockwidget.layer_listWidget.clear()
+        
+        # Add items back in the reversed order
+        for item in items:
+            self.dockwidget.layer_listWidget.addItem(item)
 
     def get_layer(self):
         # re-initializing the layer
