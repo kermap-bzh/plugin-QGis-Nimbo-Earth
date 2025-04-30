@@ -178,11 +178,6 @@
         <translation>Ou</translation>
     </message>
     <message>
-        <location filename="../nimbo_earth_dockwidget_base.ui" line="577"/>
-        <source>Layer selector</source>
-        <translation>Sélection de la couche</translation>
-    </message>
-    <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="610"/>
         <source>Select your parameters</source>
         <translation>Choisir vos options</translation>
@@ -201,6 +196,11 @@
         <location filename="../nimbo_earth_dockwidget_base.ui" line="691"/>
         <source>Choose a month</source>
         <translation>Choisir un mois</translation>
+    </message>
+    <message>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="700"/>
+        <source>Add 3d layer</source>
+        <translation>Ajouter la couche 3D</translation>
     </message>
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="745"/>

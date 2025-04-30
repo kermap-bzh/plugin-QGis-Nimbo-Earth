@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>850</height>
+    <height>931</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>500</width>
-    <height>850</height>
+    <height>931</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>500</width>
-    <height>850</height>
+    <height>1000</height>
    </size>
   </property>
   <property name="styleSheet">
@@ -38,11 +38,11 @@
    <property name="maximumSize">
     <size>
      <width>500</width>
-     <height>831</height>
+     <height>1000</height>
     </size>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="0">
+    <item row="3" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout_kn">
       <item>
        <spacer name="horizontalSpacer">
@@ -179,76 +179,42 @@
       </item>
      </layout>
     </item>
-    <item row="0" column="0">
+    <item row="2" column="0">
      <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="QLabel" name="title_label">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Welcome to Nimbo Earth Basemaps TMS</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_5">
-        <property name="spacing">
-         <number>6</number>
-        </property>
-        <property name="sizeConstraint">
-         <enum>QLayout::SetDefaultConstraint</enum>
-        </property>
-        <item>
-         <widget class="QLabel" name="geocredit_label">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="textFormat">
-           <enum>Qt::AutoText</enum>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="gc_label">
-          <property name="text">
-           <string>remaining Geocredits</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
+      <property name="spacing">
+       <number>0</number>
+      </property>
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="enabled">
          <bool>true</bool>
         </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>700</height>
+         </size>
+        </property>
         <property name="maximumSize">
          <size>
           <width>16777215</width>
-          <height>728</height>
+          <height>700</height>
          </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
         </property>
         <property name="currentIndex">
          <number>1</number>
+        </property>
+        <property name="usesScrollButtons">
+         <bool>true</bool>
         </property>
         <widget class="QWidget" name="key_tab">
          <property name="focusPolicy">
@@ -298,7 +264,7 @@
                  <x>20</x>
                  <y>40</y>
                  <width>411</width>
-                 <height>27</height>
+                 <height>31</height>
                 </rect>
                </property>
                <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -582,10 +548,79 @@
             <x>10</x>
             <y>10</y>
             <width>451</width>
-            <height>661</height>
+            <height>663</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="tms_tab_vLayout">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="topMargin">
+            <number>30</number>
+           </property>
+           <property name="bottomMargin">
+            <number>20</number>
+           </property>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="sizeConstraint">
+              <enum>QLayout::SetDefaultConstraint</enum>
+             </property>
+             <item>
+              <widget class="QLabel" name="geocredit_label">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="textFormat">
+                <enum>Qt::AutoText</enum>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="gc_label">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>remaining Geocredits</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
            <item>
             <widget class="QGroupBox" name="groupBox_2">
              <property name="sizePolicy">
@@ -597,25 +632,31 @@
              <property name="minimumSize">
               <size>
                <width>0</width>
-               <height>250</height>
+               <height>210</height>
               </size>
              </property>
              <property name="maximumSize">
               <size>
                <width>16777215</width>
-               <height>250</height>
+               <height>210</height>
               </size>
+             </property>
+             <property name="autoFillBackground">
+              <bool>false</bool>
              </property>
              <property name="title">
               <string>Select your parameters</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
              </property>
              <widget class="QWidget" name="layoutWidget">
               <property name="geometry">
                <rect>
                 <x>20</x>
-                <y>30</y>
+                <y>40</y>
                 <width>409</width>
-                <height>29</height>
+                <height>33</height>
                </rect>
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -654,9 +695,9 @@
               <property name="geometry">
                <rect>
                 <x>20</x>
-                <y>90</y>
+                <y>80</y>
                 <width>409</width>
-                <height>27</height>
+                <height>33</height>
                </rect>
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -679,9 +720,9 @@
               <property name="geometry">
                <rect>
                 <x>20</x>
-                <y>150</y>
+                <y>120</y>
                 <width>409</width>
-                <height>27</height>
+                <height>33</height>
                </rect>
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -703,8 +744,8 @@
              <widget class="QPushButton" name="add_map_cbox_pButton">
               <property name="geometry">
                <rect>
-                <x>110</x>
-                <y>200</y>
+                <x>120</x>
+                <y>170</y>
                 <width>200</width>
                 <height>25</height>
                </rect>
@@ -732,28 +773,28 @@
              <property name="minimumSize">
               <size>
                <width>0</width>
-               <height>200</height>
+               <height>185</height>
               </size>
              </property>
              <property name="maximumSize">
               <size>
                <width>16777215</width>
-               <height>200</height>
+               <height>185</height>
               </size>
              </property>
              <property name="title">
               <string>Or choose from the list</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignHCenter|Qt::AlignTop</set>
              </property>
              <widget class="QListWidget" name="layer_listWidget">
               <property name="geometry">
                <rect>
                 <x>20</x>
-                <y>30</y>
-                <width>400</width>
-                <height>111</height>
+                <y>40</y>
+                <width>406</width>
+                <height>95</height>
                </rect>
               </property>
               <property name="font">
@@ -768,8 +809,8 @@
              <widget class="QPushButton" name="add_map_list_pButton">
               <property name="geometry">
                <rect>
-                <x>110</x>
-                <y>160</y>
+                <x>121</x>
+                <y>147</y>
                 <width>200</width>
                 <height>25</height>
                </rect>
@@ -797,26 +838,26 @@
              <property name="minimumSize">
               <size>
                <width>0</width>
-               <height>170</height>
+               <height>150</height>
               </size>
              </property>
              <property name="maximumSize">
               <size>
                <width>16777215</width>
-               <height>170</height>
+               <height>150</height>
               </size>
              </property>
              <property name="title">
               <string>Professional plans</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignHCenter|Qt::AlignTop</set>
              </property>
              <widget class="QPushButton" name="pricing_link">
               <property name="geometry">
                <rect>
-                <x>110</x>
-                <y>130</y>
+                <x>122</x>
+                <y>105</y>
                 <width>200</width>
                 <height>25</height>
                </rect>
@@ -843,7 +884,7 @@
                 <x>10</x>
                 <y>30</y>
                 <width>431</width>
-                <height>91</height>
+                <height>71</height>
                </rect>
               </property>
               <property name="text">
@@ -860,7 +901,80 @@
         </widget>
        </widget>
       </item>
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
      </layout>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="title_label_2">
+      <property name="font">
+       <font>
+        <pointsize>14</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">margin-bottom: 10px;</string>
+      </property>
+      <property name="text">
+       <string>Welcome to Nimbo Earth Basemaps TMS</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="title_label_3">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>70</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>70</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color:#4CAE50; color:white; border-radius: 8px; padding:10px; margin-bottom: 10px;</string>
+      </property>
+      <property name="text">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Quelques questions pour savoir ce qui vous plaît sur Nimbo et comment mieux répondre à vos enjeux ! &lt;a href=&quot;https://docs.google.com/forms/d/e/1FAIpQLScgmTSJuLzm69WIVrukPX4GQuvm7PqkL8jZPzXAzxPYIiunrA/viewform&quot;&gt;&lt;span style=&quot; font-weight:700; text-decoration: underline; color:#ffffff;&quot;&gt;Votre avis sur Nimbo&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="scaledContents">
+       <bool>false</bool>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+      <property name="margin">
+       <number>0</number>
+      </property>
+      <property name="openExternalLinks">
+       <bool>true</bool>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

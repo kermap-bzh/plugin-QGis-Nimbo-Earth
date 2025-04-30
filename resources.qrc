@@ -1,9 +1,0 @@
-<RCC>
-    <qresource prefix="/plugins/nimbo_earth" >
-        <file>assets/icon.png</file>
-        <file>assets/kermapLogo.png</file>
-        <file>assets/eye.png</file>
-        <file>assets/eye-off.png</file>
-        <file>assets/question.png</file>
-    </qresource>
-</RCC>

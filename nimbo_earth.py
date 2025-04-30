@@ -93,6 +93,7 @@ class NimboEarth:
 
     # noinspection PyMethodMayBeStatic
 
+
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
 
@@ -106,6 +107,7 @@ class NimboEarth:
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('NimboEarth', message)
+
 
     def add_action(
             self,
@@ -172,13 +174,12 @@ class NimboEarth:
             self.toolbar.addAction(action)
 
         if add_to_menu:
-            self.iface.addPluginToWebMenu(
-                self.menu,
-                action)
+            self.iface.addPluginToWebMenu(self.menu, action)
 
         self.actions.append(action)
 
         return action
+
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
@@ -188,7 +189,8 @@ class NimboEarth:
             icon_path,
             text=self.tr(u'Import XYZ Layer'),
             callback=self.run,
-            parent=self.iface.mainWindow())
+            parent=self.iface.mainWindow()
+        )
         self.add_action(
             icon_path=':/plugins/nimbo_earth/assets/icon.png',
             text=self.tr(u'About Nimbo'),
@@ -204,14 +206,18 @@ class NimboEarth:
             add_to_toolbar=False
         )
 
+
     def go_to_about(self):
         webbrowser.open(ABOUT_URL)
+    
+    
     def go_to_help(self):   
         abs_path = os.path.dirname(os.path.abspath(__file__))
         help_path = os.path.join(abs_path, 'help/build/html/index.html')
         help_file = 'file:///'+help_path
         QDesktopServices.openUrl(QUrl(help_file))
     # --------------------------------------------------------------------------
+
 
     def onClosePlugin(self):
         """Cleanup necessary items here when plugin dockwidget is closed"""
@@ -235,20 +241,20 @@ class NimboEarth:
 
         self.pluginIsActive = False
 
+
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
 
         # print "** UNLOAD NimboEarth"
 
         for action in self.actions:
-            self.iface.removePluginWebMenu(
-                self.tr(u'&Nimbo Earth'),
-                action)
+            self.iface.removePluginWebMenu(self.tr(u'&Nimbo Earth'),action)
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
         del self.toolbar
 
     # --------------------------------------------------------------------------
+
 
     def run(self):
         """Run method that loads and starts the plugin"""
@@ -269,6 +275,9 @@ class NimboEarth:
             # setting free basemap button event
             self.dockwidget.free_pButton.clicked.connect(self.addFreeLayer)
             
+            # setting 3d dem basemap button event
+            # self.dockwidget.layer_dem.clicked.connect(self.add3DLayer)
+            
             # setting redirect button to nimbo subscription page
             self.dockwidget.subscribe_pButton.clicked.connect(lambda: webbrowser.open('https://maps.nimbo.earth/freeregister'))
             
@@ -277,16 +286,12 @@ class NimboEarth:
             self.dockwidget.pricing_link.clicked.connect(lambda: webbrowser.open('https://nimbo.earth/pricing/'))
             
             # setting icons for links
-            self.dockwidget.nimbo_icon_label.setPixmap(
-                QPixmap(":/plugins/nimbo_earth/assets/icon.png"))
-            self.dockwidget.kermap_icon_label.setPixmap(
-                QPixmap(":/plugins/nimbo_earth/assets/kermapLogo.png"))
+            self.dockwidget.nimbo_icon_label.setPixmap(QPixmap(":/plugins/nimbo_earth/assets/icon.png"))
+            self.dockwidget.kermap_icon_label.setPixmap(QPixmap(":/plugins/nimbo_earth/assets/kermapLogo.png"))
             # setting text for links
-            self.dockwidget.nimbo_label.setText(
-                '<a style="color: white;font-weight:bold;text-decoration: none;" href="https://nimbo.earth">{0}</a>'.format(self.tr("About Nimbo")))
+            self.dockwidget.nimbo_label.setText('<a style="color: white;font-weight:bold;text-decoration: none;" href="https://nimbo.earth">{0}</a>'.format(self.tr("About Nimbo")))
             self.dockwidget.nimbo_label.setOpenExternalLinks(True)
-            self.dockwidget.kermap_label.setText(
-                '<a style="color: white;font-weight:bold; text-decoration: none;" href="https://kermap.com/en/our-story/">{0}</a>'.format(self.tr("About Kermap")))
+            self.dockwidget.kermap_label.setText('<a style="color: white;font-weight:bold; text-decoration: none;" href="https://kermap.com/en/our-story/">{0}</a>'.format(self.tr("About Kermap")))
             self.dockwidget.kermap_label.setOpenExternalLinks(True)
             # disabling second tab widget
             self.dockwidget.tabWidget.setTabEnabled(1, False)
@@ -296,24 +301,18 @@ class NimboEarth:
             # login or entering API Key
             self.dockwidget.tabWidget.setCurrentWidget(self.dockwidget.key_tab)
             self.dockwidget.password_lineEdit.setEchoMode(QLineEdit.Password)
-            self.dockwidget.eye_pButton.setIcon(
-                QIcon(QPixmap(":/plugins/nimbo_earth/assets/eye-off.png")))
+            self.dockwidget.eye_pButton.setIcon(QIcon(QPixmap(":/plugins/nimbo_earth/assets/eye-off.png")))
             self.dockwidget.eye_pButton.pressed.connect(self.show_password)
             self.dockwidget.eye_pButton.released.connect(self.hide_password)
             self.dockwidget.login_pButton.clicked.connect(self.login)
             self.dockwidget.key_pButton.clicked.connect(self.update_api_key)
 
             # selecting layer to add
-            self.dockwidget.composition_selector_comBox.currentTextChanged.connect(
-                self.clear_list_selection)
-            self.dockwidget.month_comBox.currentTextChanged.connect(
-                self.clear_list_selection)
-            self.dockwidget.year_comBox.currentTextChanged.connect(
-                self.clear_list_selection)
-            self.dockwidget.add_map_cbox_pButton.clicked.connect(
-                self.get_layer)
-            self.dockwidget.add_map_list_pButton.clicked.connect(
-                self.get_layer)
+            self.dockwidget.composition_selector_comBox.currentTextChanged.connect(self.clear_list_selection)
+            self.dockwidget.month_comBox.currentTextChanged.connect(self.clear_list_selection)
+            self.dockwidget.year_comBox.currentTextChanged.connect(self.clear_list_selection)
+            self.dockwidget.add_map_cbox_pButton.clicked.connect(self.get_layer)
+            self.dockwidget.add_map_list_pButton.clicked.connect(self.get_layer)
 
             # connect to provide cleanup on closing of dockwidget
             self.dockwidget.closingPlugin.connect(self.onClosePlugin)
@@ -323,17 +322,18 @@ class NimboEarth:
             self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockwidget)
             self.dockwidget.show()
     
+    
     def show_password(self):
         self.dockwidget.password_lineEdit.setEchoMode(QLineEdit.Normal)
-        self.dockwidget.eye_pButton.setIcon(
-            QIcon(QPixmap(":/plugins/nimbo_earth/assets/eye.png")))
+        self.dockwidget.eye_pButton.setIcon(QIcon(QPixmap(":/plugins/nimbo_earth/assets/eye.png")))
         self.dockwidget.eye_pButton.setIconSize(QSize(16, 16))
+
 
     def hide_password(self):
         self.dockwidget.password_lineEdit.setEchoMode(QLineEdit.Password)
-        self.dockwidget.eye_pButton.setIcon(
-            QIcon(QPixmap(":/plugins/nimbo_earth/assets/eye-off.png")))
+        self.dockwidget.eye_pButton.setIcon(QIcon(QPixmap(":/plugins/nimbo_earth/assets/eye-off.png")))
         self.dockwidget.eye_pButton.setIconSize(QSize(16, 16))
+
 
     def login(self):
         # getting email and password from line edit
@@ -342,16 +342,15 @@ class NimboEarth:
 
         # getting api_key
         self.user.api_key = ''
-        self.user.api_key = self.services.get_api_key(
-            self.user.email, self.user.password)
+        self.user.api_key = self.services.get_api_key(self.user.email, self.user.password)
 
         # setting token to api key line edit
         if self.user.api_key is not None:
             # self.dockwidget.key_input_lineEdit.setText(self.user.api_key)
             self.validate_api_key(self.user.api_key)
         else:
-            self.iface.messageBar().pushMessage(
-                self.tr("Error"), self.tr("Incorrect email or password "), level=2, duration=5)
+            self.iface.messageBar().pushMessage(self.tr("Error"), self.tr("Incorrect email or password "), level=2, duration=5)
+
 
     def update_api_key(self):
         """update the api key value from the input of the line edit"""
@@ -359,9 +358,9 @@ class NimboEarth:
         self.user.api_key = ''
         # getting the api key copied in the line edit
         self.user.api_key = self.dockwidget.key_input_lineEdit.text().strip()
-
         # checking api key validity
         self.validate_api_key(self.user.api_key)
+
 
     def validate_api_key(self, api_key):
         """checks if the api key is valid"""
@@ -376,12 +375,11 @@ class NimboEarth:
         if response.status_code == 200:
             self.get_geocredits(response)
             xml_file = response.content
-            self.iface.messageBar().pushMessage(
-                self.tr("Success"), self.tr("Your API key is valid"), level=3, duration=5)
+            self.iface.messageBar().pushMessage(self.tr("Success"), self.tr("Your API key is valid"), level=3, duration=5)
             self.update_layer_selection(xml_file, api_key)
         else:
-            self.iface.messageBar().pushMessage(
-                self.tr("Error"), self.tr("Your API Key is not valid"), level=2, duration=5)
+            self.iface.messageBar().pushMessage(self.tr("Error"), self.tr("Your API Key is not valid"), level=2, duration=5)
+
 
     def get_geocredits(self, response):
         geocredit = int(response.headers['X-Kermap-Available-Credits'])
@@ -395,6 +393,7 @@ class NimboEarth:
         self.dockwidget.gc_label.setVisible(True)    
         self.dockwidget.geocredit_label.setText(label)
         
+        
     def update_layer_selection(self, xml_file, api_key):
         # getting the tile maps list
         self.tile_maps = self.services.get_tile_maps(xml_file)
@@ -405,37 +404,31 @@ class NimboEarth:
         self.dockwidget.tabWidget.setTabEnabled(1, True)
         self.dockwidget.tabWidget.setCurrentWidget(self.dockwidget.tms_tab)
 
+
     def populating_cbboxes_and_listwidget(self):
         # populating image composition combo box if empty
         if self.dockwidget.composition_selector_comBox.count() == 0:
-            compositions = self.services.get_composition_from_layers(
-                self.tile_maps)
+            compositions = self.services.get_composition_from_layers(self.tile_maps)
             for composition in compositions:
-                self.dockwidget.composition_selector_comBox.addItem(
-                    ImageComposition(composition).describe())
-            self.dockwidget.composition_selector_comBox.setCurrentText(
-                ImageComposition.NATURAL.describe())
+                self.dockwidget.composition_selector_comBox.addItem(ImageComposition(composition).describe())
+            self.dockwidget.composition_selector_comBox.setCurrentText(ImageComposition.NATURAL.describe())
 
         # populating year combo box if empty
         if self.dockwidget.year_comBox.count() == 0:
             for year in range(self.services.get_min_year(self.tile_maps), self.services.get_max_year(self.tile_maps)+1):
-                self.dockwidget.year_comBox.addItem(
-                    str(year))
-                self.dockwidget.year_comBox.setCurrentText(
-                    str(self.services.get_max_year(self.tile_maps)))
+                self.dockwidget.year_comBox.addItem(str(year))
+                self.dockwidget.year_comBox.setCurrentText(str(self.services.get_max_year(self.tile_maps)))
 
         # populating month combo box depending on year selected
         self.month_selection()
-        self.dockwidget.year_comBox.currentTextChanged.connect(
-            self.month_selection)
+        self.dockwidget.year_comBox.currentTextChanged.connect(self.month_selection)
 
         # adding layers to the listWidget
         self.dockwidget.layer_listWidget.clear() 
         for layer in self.tile_maps.layers:
             
             if "no title set" in layer.title:
-                self.dockwidget.layer_listWidget.addItem(self.services.get_month_name(
-                    layer.month) + ' ' + layer.year + ' '+self.services.get_composition_name(layer.composition))
+                self.dockwidget.layer_listWidget.addItem(self.services.get_month_name(layer.month) + ' ' + layer.year + ' '+self.services.get_composition_name(layer.composition))
             else:
                 self.dockwidget.layer_listWidget.addItem(layer.title)
             
@@ -446,15 +439,15 @@ class NimboEarth:
 
         if self.dockwidget.month_comBox.count() == 0:
             # getting all months for a semected year
-            months = self.services.get_month_for_this_year(
-                self.dockwidget.year_comBox.currentText(), self.tile_maps)
+            months = self.services.get_month_for_this_year(self.dockwidget.year_comBox.currentText(), self.tile_maps)
             # getting month name et adding it to the combo box
             for month in months:
-                self.dockwidget.month_comBox.addItem(
-                    self.services.get_month_name(str(month)))
+                self.dockwidget.month_comBox.addItem(self.services.get_month_name(str(month)))
+
 
     def clear_list_selection(self):
         self.dockwidget.layer_listWidget.clearSelection()
+
 
     def get_layer(self):
         # re-initializing the layer
@@ -490,28 +483,28 @@ class NimboEarth:
             if self.layer:
                 self.add_layer(self.layer)
             else:
-                self.iface.messageBar().pushMessage(self.tr("Warning"),
-                                                    self.tr("No Layer with those parameters: please change date or composition"), level=1, duration=5)
+                self.iface.messageBar().pushMessage(
+                    self.tr("Warning"),
+                    self.tr("No Layer with those parameters: please change date or composition"), level=1, duration=5
+                )
+
 
     def add_layer(self, layer):
         # adding api key and type to layer url
         layer.href = "type=xyz&url=" + layer.href + "/{z}/{x}/{-y}.png?kermap_token=" + \
             self.user.api_key
         if "no title set" in layer.title:
-            title = self.services.get_month_name(str(
-                layer.month)) + ' ' + layer.year + ' ' + self.services.get_composition_name(layer.composition)
+            title = self.services.get_month_name(str(layer.month)) + ' ' + layer.year + ' ' + self.services.get_composition_name(layer.composition)
             rlayer = QgsRasterLayer(layer.href, title, "wms")
         else:
-            rlayer = QgsRasterLayer(
-                layer.href, layer.title, "wms")
+            rlayer = QgsRasterLayer(layer.href, layer.title, "wms")
 
         if rlayer.isValid():
             QgsProject().instance().addMapLayer(rlayer)
-            self.iface.messageBar().pushMessage(
-                self.tr("Success"), self.tr("Layer added - wait until loading is complete"), level=3, duration=5)
+            self.iface.messageBar().pushMessage(self.tr("Success"), self.tr("Layer added - wait until loading is complete"), level=3, duration=5)
         else:
-            self.iface.messageBar().pushMessage(
-                self.tr("Warning"), self.tr("Invalid layer: unable to add it to the project"), level=1, duration=5)
+            self.iface.messageBar().pushMessage(self.tr("Warning"), self.tr("Invalid layer: unable to add it to the project"), level=1, duration=5)
+
 
     def addFreeLayer(self):
         # re-initializing the layer
@@ -521,9 +514,20 @@ class NimboEarth:
         flayer = QgsRasterLayer(layer.href, layer.title, "wms")
         if flayer.isValid():
             QgsProject().instance().addMapLayer(flayer)
-            self.iface.messageBar().pushMessage(
-                self.tr("Success"), self.tr("Layer added - wait until loading is complete"), level=3, duration=5)
+            self.iface.messageBar().pushMessage(self.tr("Success"), self.tr("Layer added - wait until loading is complete"), level=3, duration=5)
         else:
-            self.iface.messageBar().pushMessage(
-                self.tr("Warning"), self.tr("Invalid layer: unable to add it to the project"), level=1, duration=5)
+            self.iface.messageBar().pushMessage(self.tr("Warning"), self.tr("Invalid layer: unable to add it to the project"), level=1, duration=5)
+            
+            
+    def add3DLayer(self):
+        # re-initializing the layer
+        layer = XYZLayerModel()
+        layer.href = "type=xyz&url=https://prod-data.nimbo.earth/tiles/terrain-dem/{z}/{x}/{y}?kermap_token=" + self.user.api_key
+        layer.title = "Nimbo Dem Layer"
+        flayer = QgsRasterLayer(layer.href, layer.title, "wms")
+        if flayer.isValid():
+            QgsProject().instance().addMapLayer(flayer)
+            self.iface.messageBar().pushMessage(self.tr("Success"), self.tr("Layer added - wait until loading is complete"), level=3, duration=5)
+        else:
+            self.iface.messageBar().pushMessage(self.tr("Warning"), self.tr("Invalid layer: unable to add it to the project"), level=1, duration=5)
         
