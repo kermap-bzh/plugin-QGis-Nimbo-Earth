@@ -935,7 +935,7 @@
      </widget>
     </item>
     <item row="1" column="0">
-     <widget class="QLabel" name="title_label_3">
+     <widget class="QLabel" name="infoPopUp">
       <property name="minimumSize">
        <size>
         <width>0</width>
@@ -957,7 +957,7 @@
        <string notr="true">background-color:#4CAE50; color:white; border-radius: 8px; padding:10px; margin-bottom: 10px;</string>
       </property>
       <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Quelques questions pour savoir ce qui vous plaît sur Nimbo et comment mieux répondre à vos enjeux ! &lt;a href=&quot;https://docs.google.com/forms/d/e/1FAIpQLScgmTSJuLzm69WIVrukPX4GQuvm7PqkL8jZPzXAzxPYIiunrA/viewform&quot;&gt;&lt;span style=&quot; font-weight:700; text-decoration: underline; color:#ffffff;&quot;&gt;Votre avis sur Nimbo&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A few questions to let us know what you like about Nimbo and how it could better meet your needs ! &lt;a href=&quot;https://docs.google.com/forms/d/e/1FAIpQLSfuMud2VuwgcIEiXM7CP96eb2SWuWcCJn9csQs01-d7Nw9L4A/viewform&quot;&gt;&lt;span style=&quot; font-weight:700; text-decoration: underline; color:#ffffff;&quot;&gt;Share your Nimbo feedback !&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="scaledContents">
        <bool>false</bool>

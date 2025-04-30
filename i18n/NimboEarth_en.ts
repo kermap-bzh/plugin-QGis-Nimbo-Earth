@@ -227,5 +227,10 @@
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Learn more about Nimbo geocredit plans and advanced &lt;br&gt;geospatial applications: basemap integration, multispectral &lt;br&gt; basemap download or real-time monitoring.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Découvrez les offres Nimbo pour obtenir plus de géocrédits &lt;br&gt;ou bénéficier d&apos;applications avancées : intégration de &lt;br&gt;basemaps, téléchargement de basemaps multispectrales &lt;br&gt;ou suivi en quasi temps réel.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
+    <message>
+        <location filename="../nimbo_earth_dockwidget_base.ui" line="960"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A few questions to let us know what you like about Nimbo and how it could better meet your needs ! &lt;a href=&quot;https://docs.google.com/forms/d/e/1FAIpQLSfuMud2VuwgcIEiXM7CP96eb2SWuWcCJn9csQs01-d7Nw9L4A/viewform&quot;&gt;&lt;span style=&quot; font-weight:700; text-decoration: underline; color:#ffffff;&quot;&gt;Share your Nimbo feedback !&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Quelques questions pour savoir ce qui vous plaît sur Nimbo et comment mieux répondre à vos enjeux ! &lt;a href=&quot;https://docs.google.com/forms/d/e/1FAIpQLScgmTSJuLzm69WIVrukPX4GQuvm7PqkL8jZPzXAzxPYIiunrA/viewform&quot;&gt;&lt;span style=&quot; font-weight:700; text-decoration: underline; color:#ffffff;&quot;&gt;Votre avis sur Nimbo&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
 </context>
 </TS>
