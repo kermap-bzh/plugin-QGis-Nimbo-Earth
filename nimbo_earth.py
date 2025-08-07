@@ -340,9 +340,17 @@ class NimboEarth:
         self.user.email = self.dockwidget.email_lineEdit.text().strip()
         self.user.password = self.dockwidget.password_lineEdit.text().strip()
 
-        # getting api_key
+        # getting api_key and access_token
         self.user.api_key = ''
-        self.user.api_key = self.services.get_api_key(self.user.email, self.user.password)
+        access_token = self.services.get_access_token(self.user.email, self.user.password)
+        if access_token is not None:
+            self.user.api_key = self.services.get_kermap_token(access_token)
+            # get user subscription type (FREE/PRO)
+            self.user.subscription_type = self.services.get_user_subscription_type(access_token)
+            print(self.user.subscription_type)
+        else:
+            self.user.api_key = None
+            self.user.subscription_type = None
 
         # setting token to api key line edit
         if self.user.api_key is not None:
@@ -372,8 +380,13 @@ class NimboEarth:
         # if status is 200 then update the layer selection with the list of urls availables
         # else raising exceptions
         response = requests.get(request_url, headers=headers) 
+        print("avant le if")
         if response.status_code == 200:
             self.get_geocredits(response)
+            # Set user subscription type from API key
+            print("check de la souscription")
+            self.user.subscription_type = self.services.get_user_subscription_type_from_kermap_token(api_key)
+            print(f"User subscription type: {self.user.subscription_type}")
             xml_file = response.content
             self.iface.messageBar().pushMessage(self.tr("Success"), self.tr("Your API key is valid"), level=3, duration=5)
             self.update_layer_selection(xml_file, api_key)
@@ -396,7 +409,24 @@ class NimboEarth:
         
     def update_layer_selection(self, xml_file, api_key):
         # getting the tile maps list
-        self.tile_maps = self.services.get_tile_maps(xml_file)
+        self.tile_maps = self.services.get_tile_maps(xml_file, self.user.subscription_type)
+
+        # --- Patch: ensure year is always valid for FREE users ---
+        if hasattr(self.user, 'subscription_type') and self.user.subscription_type == 'FREE':
+            for layer in self.tile_maps.layers:
+                # If year is not a valid integer, try to re-parse from title or href
+                try:
+                    int(layer.year)
+                except Exception:
+                    # Try to parse from title (prefer title for watermark)
+                    parts = layer.title.split('_')
+                    if len(parts) == 4 and parts[0].lower() == 'watermark':
+                        layer.year = parts[1]
+                    else:
+                        href_parts = layer.href.split('/')[-1].split('@')[0].split('_')
+                        if len(href_parts) == 4 and href_parts[0].lower() == 'watermark':
+                            layer.year = href_parts[1]
+        # --- End patch ---
 
         # populating the combo boxes and the list widget
         self.populating_cbboxes_and_listwidget()
@@ -408,10 +438,16 @@ class NimboEarth:
     def populating_cbboxes_and_listwidget(self):
         # populating image composition combo box if empty
         if self.dockwidget.composition_selector_comBox.count() == 0:
-            compositions = self.services.get_composition_from_layers(self.tile_maps)
-            for composition in compositions:
-                self.dockwidget.composition_selector_comBox.addItem(ImageComposition(composition).describe())
-            self.dockwidget.composition_selector_comBox.setCurrentText(ImageComposition.NATURAL.describe())
+            # Only allow RGB for FREE/watermark users
+            if hasattr(self.user, 'subscription_type') and self.user.subscription_type == 'FREE':
+                self.dockwidget.composition_selector_comBox.clear()
+                self.dockwidget.composition_selector_comBox.addItem(ImageComposition(1).describe())
+                self.dockwidget.composition_selector_comBox.setCurrentText(ImageComposition.NATURAL.describe())
+            else:
+                compositions = self.services.get_composition_from_layers(self.tile_maps)
+                for composition in compositions:
+                    self.dockwidget.composition_selector_comBox.addItem(ImageComposition(composition).describe())
+                self.dockwidget.composition_selector_comBox.setCurrentText(ImageComposition.NATURAL.describe())
 
         # populating year combo box if empty
         if self.dockwidget.year_comBox.count() == 0:
@@ -466,6 +502,7 @@ class NimboEarth:
             self.dockwidget.layer_listWidget.addItem(item)
 
     def get_layer(self):
+        print("DEBUG: get_layer called, button click registered")  # Debug log
         # re-initializing the layer
         layer = XYZLayerModel()
 
@@ -496,6 +533,7 @@ class NimboEarth:
             # assembling data in list
             data_retrieved = [month, year, composition_string]
             self.layer = self.services.filtering_layers(data_retrieved)
+            print(f"DEBUG: get_layer called, layer={self.layer}")  # Debug log
             if self.layer:
                 self.add_layer(self.layer)
             else:
@@ -506,9 +544,21 @@ class NimboEarth:
 
 
     def add_layer(self, layer):
-        # adding api key and type to layer url
-        layer.href = "type=xyz&url=" + layer.href + "/{z}/{x}/{-y}.png?kermap_token=" + \
-            self.user.api_key
+        # Construct the correct layer identifier in the URL based on user type
+        year = str(layer.year)
+        month_raw = str(layer.month)
+        compo = str(layer.composition)
+        if hasattr(self.user, 'subscription_type') and self.user.subscription_type == 'FREE':
+            month = month_raw  # Do NOT zero-pad
+            layer_id = f"watermark_{year}_{month}_1"
+        else:
+            # PRO: do not zero-pad month
+            month = str(int(month_raw)) if month_raw.isdigit() else month_raw
+            layer_id = f"{year}_{month}_{compo}"
+        # Build the full href using the correct layer_id
+        base_url = layer.href.split('/tms/1.0.0/')[0] + '/tms/1.0.0/'
+        layer.href = f"type=xyz&url={base_url}{layer_id}@kermap/{{z}}/{{x}}/{{-y}}.png?kermap_token={self.user.api_key}"
+        print(f"DEBUG: add_layer called, href={layer.href}")  # Debug log
         if "no title set" in layer.title:
             title = self.services.get_month_name(str(layer.month)) + ' ' + layer.year + ' ' + self.services.get_composition_name(layer.composition)
             rlayer = QgsRasterLayer(layer.href, title, "wms")

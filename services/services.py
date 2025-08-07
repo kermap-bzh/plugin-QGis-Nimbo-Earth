@@ -14,6 +14,46 @@ from ..constants import USER_URL, ImageComposition
 class Services:
     checks = Checks()
     tile_maps = TileMapsModel()
+
+    def get_user_subscription_type_from_kermap_token(self, kermap_token):
+        """
+        Given a Kermap Token (API key), call the backend endpoint /user-me-from-kermap-token,
+        extract user_features, and return 'PRO' or 'FREE' for the geocredits feature.
+        """
+        from ..constants import USER_URL
+        url = f"{USER_URL}/user-me-from-kermap-token/?kermap_token={kermap_token}"
+        try:
+            response = requests.get(url)
+            if response.status_code == 200:
+                data = response.json()
+                features = data.get('user_features', [])
+                # Find 'Nimbo GeoCredits' feature and return its feature_account
+                for feat in features:
+                    if feat.get('feature') == 'Nimbo GeoCredits':
+                        return feat.get('feature_account', 'FREE')
+                return 'FREE'
+            else:
+                print(f"Failed to fetch user features: {response.status_code}")
+                return 'FREE'
+        except Exception as e:
+            print(f"Exception fetching user features from kermap_token: {e}")
+            return 'FREE'
+
+    def get_user_subscription_type(self, access_token):
+        """Fetches user features and returns 'FREE' or 'PRO' for the geocredits feature."""
+        from ..constants import USER_URL, GEOCREDITS_REF
+        headers = {'Authorization': 'Bearer ' + access_token}
+        url = USER_URL + '/user-feature-me/'
+        try:
+            response = requests.get(url, headers=headers)
+            if response.status_code == 200:
+                features = response.json()
+                return self.get_geocredits_feature_type_from_features(features)
+            return 'FREE'  # fallback to FREE if not found or error
+        except Exception as e:
+            print(f"Error fetching user features: {e}")
+            return 'FREE'
+            
     def get_api_key(self, email, password):
         # making request to get the access token
         access_token = self.get_access_token(
@@ -56,7 +96,7 @@ class Services:
         return kermap_token
 
 
-    def get_tile_maps(self, xml_file):
+    def get_tile_maps(self, xml_file, subscription_type=None):
         # clearing the tile_maps_list
         self.tile_maps.layers.clear()
         
@@ -73,15 +113,33 @@ class Services:
             new_layer = {k.replace(u'@', ''): v for k, v in layer.items()}
             # creating the record from the layer dict
             rec = layer_record(**new_layer)
-            # getting the year, month and composition of the layer
-            data = rec.href.split('/')[6].split('@')[0].split('_')
-            # adding the layer as XYZLayer to tile maps
-            if ('water' not in data) and ('rasterdem' not in data) and ('copernicus' not in data):
-                if int(data[1]) < 10 :
-                    data[1] = '0' + data[1]
-                self.tile_maps.layers.append(XYZLayerModel(
-                    rec.title, rec.srs, rec.profile, rec.href, year=data[0], month=data[1], composition=data[2]))
-                self.tile_maps.layers.sort(key=attrgetter('year','month'))
+            # filtering for FREE/PRO
+            if subscription_type == 'FREE':
+                # getting the year, month and composition of the layer
+                print(rec.href.split('/'))
+                data = rec.href.split('/')[6].split('@')[0].split('_')
+                # Only allow watermark services for FREE
+                # Only process if tileset is in expected format: watermark_YEAR_MONTH_COMPO
+                print("DEBUG: Processing data: data={data}")
+                if len(data) == 4 and data[0].lower() == 'watermark':
+                    year, month, compo = data[1], data[2], data[3]
+                    # Do NOT zero-pad month for FREE users
+                    month = str(int(month)) if month.isdigit() else month
+                    print("DEBUG: Adding layer: year={year}, month={month}, composition={compo}")
+                    self.tile_maps.layers.append(XYZLayerModel(
+                        rec.title, rec.srs, rec.profile, rec.href, year=year, month=month, composition=compo))
+                    self.tile_maps.layers.sort(key=attrgetter('year','month'))
+            else:
+                print("dans le else a la génération")
+                # getting the year, month and composition of the layer
+                data = rec.href.split('/')[6].split('@')[0].split('_')
+                # PRO or default: all layers except water/rasterdem/copernicus
+                if ('water' not in data) and ('rasterdem' not in data) and ('copernicus' not in data):
+                    # For PRO, do not zero-pad month, always use int
+                    month = str(int(data[1])) if data[1].isdigit() else data[1]
+                    self.tile_maps.layers.append(XYZLayerModel(
+                        rec.title, rec.srs, rec.profile, rec.href, year=data[0], month=month, composition=data[2]))
+                    self.tile_maps.layers.sort(key=attrgetter('year','month'))
 
         return self.tile_maps
 
@@ -149,7 +207,11 @@ class Services:
         return list(months)
 
     def filtering_layers(self, data):
+        print(f"DEBUG: filtering_layers called, data={data}")  # Debug log
         for layer in self.tile_maps.layers:
+            print(f"DEBUG: Comparing layer: month_name={self.get_month_name(layer.month)}, year={layer.year}, composition_name={self.get_composition_name(layer.composition)}")
+            print(f"DEBUG: Against data: month={data[0]}, year={data[1]}, composition={data[2]}")
+            print(f"DEBUG: layer={layer}")  # Debug log
             # checking which layer possess this year, month and composition
             if  self.get_month_name(layer.month) == data[0]\
                 and layer.year == data[1] \

@@ -10,10 +10,13 @@ ABOUT_URL = 'https://nimbo.earth'
 
 SERVICE_URL = 'https://prod-data.nimbo.earth/mapcache/tms/1.0.0?kermap_token='
 
-USER_URL = 'https://prod-admin.nimbo.earth'
+USER_URL = 'http://localhost:8000'
 
 # base for layer name for import
 LAYER_NAME = 'Nimbo_Earth-'
+
+# user feature reference constants
+GEOCREDITS_REF = 'geocredits'
 
 # enum for image composition
 class ImageComposition(Enum):
