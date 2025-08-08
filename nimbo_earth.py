@@ -468,10 +468,10 @@ class NimboEarth:
                     ImageComposition.VEGETATION.__str__(),
                     ImageComposition.RADAR.__str__(),
                 ]:
-                    text = f"{month_name} {year} {comp_label} [PRO ONLY]"
+                    text = f"{month_name} {year} {comp_label} [PAID PLAN ONLY]"
                     item = QListWidgetItem(text)
                     item.setFlags(item.flags() & ~Qt.ItemIsEnabled & ~Qt.ItemIsSelectable)
-                    item.setToolTip(self.tr("This layer is available with PRO plans only."))
+                    item.setToolTip(self.tr("This layer is available with PAID plans only."))
                     self.dockwidget.layer_listWidget.addItem(item)
         self.reverse_sort_layers()
             
