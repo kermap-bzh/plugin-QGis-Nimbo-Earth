@@ -26,7 +26,7 @@ from logging import raiseExceptions
 import webbrowser
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt, QSize, QUrl
 from qgis.PyQt.QtGui import QIcon, QPixmap, QDesktopServices
-from qgis.PyQt.QtWidgets import QAction, QLineEdit
+from qgis.PyQt.QtWidgets import QAction, QLineEdit, QListWidgetItem
 from qgis.core import QgsRasterLayer, QgsProject
 from qgis.utils import showPluginHelp
 
@@ -410,7 +410,12 @@ class NimboEarth:
         if self.dockwidget.composition_selector_comBox.count() == 0:
             compositions = self.services.get_composition_from_layers(self.tile_maps)
             for composition in compositions:
-                self.dockwidget.composition_selector_comBox.addItem(ImageComposition(composition).describe())
+                # Some backends may introduce new composition codes; ignore unsupported ones
+                try:
+                    self.dockwidget.composition_selector_comBox.addItem(ImageComposition(composition).describe())
+                except Exception:
+                    # Skip unknown composition codes to avoid enum crash
+                    continue
             self.dockwidget.composition_selector_comBox.setCurrentText(ImageComposition.NATURAL.describe())
 
         # populating year combo box if empty
@@ -424,13 +429,50 @@ class NimboEarth:
         self.dockwidget.year_comBox.currentTextChanged.connect(self.month_selection)
 
         # adding layers to the listWidget
-        self.dockwidget.layer_listWidget.clear() 
+        self.dockwidget.layer_listWidget.clear()
+
+        # Heuristic: if there are no dated (year+month) non-RGB layers in the dataset, we consider the user FREE for dated PRO
+        has_dated_pro_layers = False
+        for l in self.tile_maps.layers:
+            try:
+                comp_name = self.services.get_composition_name(l.composition)
+            except Exception:
+                comp_name = ''
+            if comp_name != ImageComposition.NATURAL.__str__() and getattr(l, 'year', '') and getattr(l, 'month', ''):
+                has_dated_pro_layers = True
+                break
+
+        # Build list, interleaving placeholders right after each dated RGB when FREE
         for layer in self.tile_maps.layers:
-            
+            # Base item text
             if "no title set" in layer.title:
-                self.dockwidget.layer_listWidget.addItem(self.services.get_month_name(layer.month) + ' ' + layer.year + ' '+self.services.get_composition_name(layer.composition))
+                month_name = self.services.get_month_name(layer.month)
+                comp_name = self.services.get_composition_name(layer.composition)
+                base_text = f"{month_name} {layer.year} {comp_name}"
             else:
-                self.dockwidget.layer_listWidget.addItem(layer.title)
+                base_text = layer.title
+                # Also compute comp_name for condition below
+                try:
+                    comp_name = self.services.get_composition_name(layer.composition)
+                except Exception:
+                    comp_name = ''
+
+            self.dockwidget.layer_listWidget.addItem(base_text)
+
+            # Interleave placeholders if FREE and this is a dated RGB
+            if (not has_dated_pro_layers) and comp_name == ImageComposition.NATURAL.__str__() and getattr(layer, 'year', '') and getattr(layer, 'month', ''):
+                month_name = self.services.get_month_name(str(layer.month))
+                year = str(layer.year)
+                for comp_label in [
+                    ImageComposition.INFRARED.__str__(),
+                    ImageComposition.VEGETATION.__str__(),
+                    ImageComposition.RADAR.__str__(),
+                ]:
+                    text = f"{month_name} {year} {comp_label} [PRO ONLY]"
+                    item = QListWidgetItem(text)
+                    item.setFlags(item.flags() & ~Qt.ItemIsEnabled & ~Qt.ItemIsSelectable)
+                    item.setToolTip(self.tr("This layer is available with PRO plans only."))
+                    self.dockwidget.layer_listWidget.addItem(item)
         self.reverse_sort_layers()
             
 
@@ -450,20 +492,65 @@ class NimboEarth:
         self.dockwidget.layer_listWidget.clearSelection()
 
     def reverse_sort_layers(self):
-        # Get all items from the list widget
-        items = []
+        # Collect item properties to preserve flags/tooltips
+        items_data = []
         for i in range(self.dockwidget.layer_listWidget.count()):
-            items.append(self.dockwidget.layer_listWidget.item(i).text())
+            it = self.dockwidget.layer_listWidget.item(i)
+            items_data.append((it.text(), it.flags(), it.toolTip()))
 
-        # Sort items in reverse order
-        items = list(reversed(items))
-        
-        # Clear the list widget
+        # If no placeholders, keep simple reverse for backward compatibility
+        has_placeholders = any('[PRO ONLY]' in text for (text, _, _) in items_data)
+        if not has_placeholders:
+            items_data = list(reversed(items_data))
+            self.dockwidget.layer_listWidget.clear()
+            for text, flags, tooltip in items_data:
+                it = QListWidgetItem(text)
+                it.setFlags(flags)
+                if tooltip:
+                    it.setToolTip(tooltip)
+                self.dockwidget.layer_listWidget.addItem(it)
+            return
+
+        # Group by (year, month) so placeholders stay next to their RGB after reversing
+        month_to_num = {
+            'January': 1, 'February': 2, 'March': 3, 'April': 4, 'May': 5, 'June': 6,
+            'July': 7, 'August': 8, 'September': 9, 'October': 10, 'November': 11, 'December': 12,
+        }
+        groups = {}
+        others = []
+        for text, flags, tooltip in items_data:
+            parts = text.split(' ')
+            if len(parts) >= 3 and parts[0] in month_to_num and parts[1].isdigit():
+                key = (int(parts[1]), month_to_num[parts[0]])
+                groups.setdefault(key, []).append((text, flags, tooltip))
+            else:
+                others.append((text, flags, tooltip))
+
+        # Sort groups newest first
+        sorted_keys = sorted(groups.keys(), key=lambda k: (k[0], k[1]), reverse=True)
+
+        # Rebuild list: within each group, put RGB first then placeholders (NIR, NDVI, RADAR)
+        ordered_items = []
+        for key in sorted_keys:
+            items = groups[key]
+            rgb = [it for it in items if ('[PRO ONLY]' not in it[0]) and (' RGB' in it[0])]
+            placeholders_nir = [it for it in items if ('[PRO ONLY]' in it[0]) and (' NIR ' in it[0])]
+            placeholders_ndvi = [it for it in items if ('[PRO ONLY]' in it[0]) and (' NDVI ' in it[0])]
+            placeholders_radar = [it for it in items if ('[PRO ONLY]' in it[0]) and (' RADAR ' in it[0])]
+            others_real = [it for it in items if ('[PRO ONLY]' not in it[0]) and (' RGB' not in it[0])]
+            ordered_items.extend(rgb + placeholders_nir + placeholders_ndvi + placeholders_radar + others_real)
+
+        # Append non-dated items reversed to keep prior overall reverse behavior
+        ordered_items.extend(list(reversed(others)))
+
+        # Rebuild list preserving flags and tooltips
         self.dockwidget.layer_listWidget.clear()
-        
-        # Add items back in the reversed order
-        for item in items:
-            self.dockwidget.layer_listWidget.addItem(item)
+        for text, flags, tooltip in ordered_items:
+            it = QListWidgetItem(text)
+            it.setFlags(flags)
+            if tooltip:
+                it.setToolTip(tooltip)
+            self.dockwidget.layer_listWidget.addItem(it)
 
     def get_layer(self):
         # re-initializing the layer
