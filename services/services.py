@@ -76,7 +76,7 @@ class Services:
             # getting the year, month and composition of the layer
             data = rec.href.split('/')[6].split('@')[0].split('_')
             # adding the layer as XYZLayer to tile maps
-            if ('water' not in data) and ('rasterdem' not in data) and ('copernicus' not in data):
+            if ('water' not in data) and ('rasterdem' not in data) and ('copernicus' not in data) and ('SR' not in data):
                 if int(data[1]) < 10 :
                     data[1] = '0' + data[1]
                 self.tile_maps.layers.append(XYZLayerModel(
