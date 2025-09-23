@@ -134,8 +134,8 @@ class Services:
                 print("dans le else a la génération")
                 # getting the year, month and composition of the layer
                 data = rec.href.split('/')[6].split('@')[0].split('_')
-                # PRO or default: all layers except water/rasterdem/copernicus
-                if ('water' not in data) and ('rasterdem' not in data) and ('copernicus' not in data):
+                # PRO or default: all layers except water/rasterdem/copernicus/SR
+                if ('water' not in data) and ('rasterdem' not in data) and ('copernicus' not in data) and ('SR' not in data):
                     # For PRO, do not zero-pad month, always use int
                     month = str(int(data[1])) if data[1].isdigit() else data[1]
                     self.tile_maps.layers.append(XYZLayerModel(

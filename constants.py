@@ -10,7 +10,7 @@ ABOUT_URL = 'https://nimbo.earth'
 
 SERVICE_URL = 'https://prod-data.nimbo.earth/mapcache/tms/1.0.0?kermap_token='
 
-USER_URL = 'http://localhost:8000'
+USER_URL = 'https://prod-admin.nimbo.earth'
 
 # base for layer name for import
 LAYER_NAME = 'Nimbo_Earth-'

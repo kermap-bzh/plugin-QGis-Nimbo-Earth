@@ -488,10 +488,15 @@ class NimboEarth:
                 except Exception:
                     comp_name = ''
 
-            self.dockwidget.layer_listWidget.addItem(base_text)
+            # If user is FREE, ignore real non-RGB compositions (NIR/NDVI/RADAR)
+            if (getattr(self.user, 'subscription_type', None) == 'FREE') and comp_name != ImageComposition.NATURAL.__str__():
+                # Skip adding the actual item for non-RGB
+                pass
+            else:
+                self.dockwidget.layer_listWidget.addItem(base_text)
 
-            # Interleave placeholders if FREE and this is a dated RGB
-            if (not has_dated_pro_layers) and comp_name == ImageComposition.NATURAL.__str__() and getattr(layer, 'year', '') and getattr(layer, 'month', ''):
+            # Interleave placeholders if user is FREE and this is a dated RGB
+            if (getattr(self.user, 'subscription_type', None) == 'FREE') and comp_name == ImageComposition.NATURAL.__str__() and getattr(layer, 'year', '') and getattr(layer, 'month', ''):
                 month_name = self.services.get_month_name(str(layer.month))
                 year = str(layer.year)
                 for comp_label in [
