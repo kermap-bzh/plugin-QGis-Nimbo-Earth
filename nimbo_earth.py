@@ -26,7 +26,7 @@ from logging import raiseExceptions
 import webbrowser
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt, QSize, QUrl
 from qgis.PyQt.QtGui import QIcon, QPixmap, QDesktopServices
-from qgis.PyQt.QtWidgets import QAction, QLineEdit
+from qgis.PyQt.QtWidgets import QAction, QLineEdit, QListWidgetItem
 from qgis.core import QgsRasterLayer, QgsProject
 from qgis.utils import showPluginHelp
 
@@ -340,9 +340,17 @@ class NimboEarth:
         self.user.email = self.dockwidget.email_lineEdit.text().strip()
         self.user.password = self.dockwidget.password_lineEdit.text().strip()
 
-        # getting api_key
+        # getting api_key and access_token
         self.user.api_key = ''
-        self.user.api_key = self.services.get_api_key(self.user.email, self.user.password)
+        access_token = self.services.get_access_token(self.user.email, self.user.password)
+        if access_token is not None:
+            self.user.api_key = self.services.get_kermap_token(access_token)
+            # get user subscription type (FREE/PRO)
+            self.user.subscription_type = self.services.get_user_subscription_type(access_token)
+            print(self.user.subscription_type)
+        else:
+            self.user.api_key = None
+            self.user.subscription_type = None
 
         # setting token to api key line edit
         if self.user.api_key is not None:
@@ -372,8 +380,13 @@ class NimboEarth:
         # if status is 200 then update the layer selection with the list of urls availables
         # else raising exceptions
         response = requests.get(request_url, headers=headers) 
+        print("avant le if")
         if response.status_code == 200:
             self.get_geocredits(response)
+            # Set user subscription type from API key
+            print("check de la souscription")
+            self.user.subscription_type = self.services.get_user_subscription_type_from_kermap_token(api_key)
+            print(f"User subscription type: {self.user.subscription_type}")
             xml_file = response.content
             self.iface.messageBar().pushMessage(self.tr("Success"), self.tr("Your API key is valid"), level=3, duration=5)
             self.update_layer_selection(xml_file, api_key)
@@ -396,7 +409,24 @@ class NimboEarth:
         
     def update_layer_selection(self, xml_file, api_key):
         # getting the tile maps list
-        self.tile_maps = self.services.get_tile_maps(xml_file)
+        self.tile_maps = self.services.get_tile_maps(xml_file, self.user.subscription_type)
+
+        # --- Patch: ensure year is always valid for FREE users ---
+        if hasattr(self.user, 'subscription_type') and self.user.subscription_type == 'FREE':
+            for layer in self.tile_maps.layers:
+                # If year is not a valid integer, try to re-parse from title or href
+                try:
+                    int(layer.year)
+                except Exception:
+                    # Try to parse from title (prefer title for watermark)
+                    parts = layer.title.split('_')
+                    if len(parts) == 4 and parts[0].lower() == 'watermark':
+                        layer.year = parts[1]
+                    else:
+                        href_parts = layer.href.split('/')[-1].split('@')[0].split('_')
+                        if len(href_parts) == 4 and href_parts[0].lower() == 'watermark':
+                            layer.year = href_parts[1]
+        # --- End patch ---
 
         # populating the combo boxes and the list widget
         self.populating_cbboxes_and_listwidget()
@@ -408,10 +438,16 @@ class NimboEarth:
     def populating_cbboxes_and_listwidget(self):
         # populating image composition combo box if empty
         if self.dockwidget.composition_selector_comBox.count() == 0:
-            compositions = self.services.get_composition_from_layers(self.tile_maps)
-            for composition in compositions:
-                self.dockwidget.composition_selector_comBox.addItem(ImageComposition(composition).describe())
-            self.dockwidget.composition_selector_comBox.setCurrentText(ImageComposition.NATURAL.describe())
+            # Only allow RGB for FREE/watermark users
+            if hasattr(self.user, 'subscription_type') and self.user.subscription_type == 'FREE':
+                self.dockwidget.composition_selector_comBox.clear()
+                self.dockwidget.composition_selector_comBox.addItem(ImageComposition(1).describe())
+                self.dockwidget.composition_selector_comBox.setCurrentText(ImageComposition.NATURAL.describe())
+            else:
+                compositions = self.services.get_composition_from_layers(self.tile_maps)
+                for composition in compositions:
+                    self.dockwidget.composition_selector_comBox.addItem(ImageComposition(composition).describe())
+                self.dockwidget.composition_selector_comBox.setCurrentText(ImageComposition.NATURAL.describe())
 
         # populating year combo box if empty
         if self.dockwidget.year_comBox.count() == 0:
@@ -424,13 +460,55 @@ class NimboEarth:
         self.dockwidget.year_comBox.currentTextChanged.connect(self.month_selection)
 
         # adding layers to the listWidget
-        self.dockwidget.layer_listWidget.clear() 
+        self.dockwidget.layer_listWidget.clear()
+
+        # Heuristic: if there are no dated (year+month) non-RGB layers in the dataset, we consider the user FREE for dated PRO
+        has_dated_pro_layers = False
+        for l in self.tile_maps.layers:
+            try:
+                comp_name = self.services.get_composition_name(l.composition)
+            except Exception:
+                comp_name = ''
+            if comp_name != ImageComposition.NATURAL.__str__() and getattr(l, 'year', '') and getattr(l, 'month', ''):
+                has_dated_pro_layers = True
+                break
+
+        # Build list, interleaving placeholders right after each dated RGB when FREE
         for layer in self.tile_maps.layers:
-            
+            # Base item text
             if "no title set" in layer.title:
-                self.dockwidget.layer_listWidget.addItem(self.services.get_month_name(layer.month) + ' ' + layer.year + ' '+self.services.get_composition_name(layer.composition))
+                month_name = self.services.get_month_name(layer.month)
+                comp_name = self.services.get_composition_name(layer.composition)
+                base_text = f"{month_name} {layer.year} {comp_name}"
             else:
-                self.dockwidget.layer_listWidget.addItem(layer.title)
+                base_text = layer.title
+                # Also compute comp_name for condition below
+                try:
+                    comp_name = self.services.get_composition_name(layer.composition)
+                except Exception:
+                    comp_name = ''
+
+            # If user is FREE, ignore real non-RGB compositions (NIR/NDVI/RADAR)
+            if (getattr(self.user, 'subscription_type', None) == 'FREE') and comp_name != ImageComposition.NATURAL.__str__():
+                # Skip adding the actual item for non-RGB
+                pass
+            else:
+                self.dockwidget.layer_listWidget.addItem(base_text)
+
+            # Interleave placeholders if user is FREE and this is a dated RGB
+            if (getattr(self.user, 'subscription_type', None) == 'FREE') and comp_name == ImageComposition.NATURAL.__str__() and getattr(layer, 'year', '') and getattr(layer, 'month', ''):
+                month_name = self.services.get_month_name(str(layer.month))
+                year = str(layer.year)
+                for comp_label in [
+                    ImageComposition.INFRARED.__str__(),
+                    ImageComposition.VEGETATION.__str__(),
+                    ImageComposition.RADAR.__str__(),
+                ]:
+                    text = f"{month_name} {year} {comp_label} [PAID PLAN ONLY]"
+                    item = QListWidgetItem(text)
+                    item.setFlags(item.flags() & ~Qt.ItemIsEnabled & ~Qt.ItemIsSelectable)
+                    item.setToolTip(self.tr("This layer is available with PAID plans only."))
+                    self.dockwidget.layer_listWidget.addItem(item)
         self.reverse_sort_layers()
             
 
@@ -450,22 +528,68 @@ class NimboEarth:
         self.dockwidget.layer_listWidget.clearSelection()
 
     def reverse_sort_layers(self):
-        # Get all items from the list widget
-        items = []
+        # Collect item properties to preserve flags/tooltips
+        items_data = []
         for i in range(self.dockwidget.layer_listWidget.count()):
-            items.append(self.dockwidget.layer_listWidget.item(i).text())
+            it = self.dockwidget.layer_listWidget.item(i)
+            items_data.append((it.text(), it.flags(), it.toolTip()))
 
-        # Sort items in reverse order
-        items = list(reversed(items))
-        
-        # Clear the list widget
+        # If no placeholders, keep simple reverse for backward compatibility
+        has_placeholders = any('[PRO ONLY]' in text for (text, _, _) in items_data)
+        if not has_placeholders:
+            items_data = list(reversed(items_data))
+            self.dockwidget.layer_listWidget.clear()
+            for text, flags, tooltip in items_data:
+                it = QListWidgetItem(text)
+                it.setFlags(flags)
+                if tooltip:
+                    it.setToolTip(tooltip)
+                self.dockwidget.layer_listWidget.addItem(it)
+            return
+
+        # Group by (year, month) so placeholders stay next to their RGB after reversing
+        month_to_num = {
+            'January': 1, 'February': 2, 'March': 3, 'April': 4, 'May': 5, 'June': 6,
+            'July': 7, 'August': 8, 'September': 9, 'October': 10, 'November': 11, 'December': 12,
+        }
+        groups = {}
+        others = []
+        for text, flags, tooltip in items_data:
+            parts = text.split(' ')
+            if len(parts) >= 3 and parts[0] in month_to_num and parts[1].isdigit():
+                key = (int(parts[1]), month_to_num[parts[0]])
+                groups.setdefault(key, []).append((text, flags, tooltip))
+            else:
+                others.append((text, flags, tooltip))
+
+        # Sort groups newest first
+        sorted_keys = sorted(groups.keys(), key=lambda k: (k[0], k[1]), reverse=True)
+
+        # Rebuild list: within each group, put RGB first then placeholders (NIR, NDVI, RADAR)
+        ordered_items = []
+        for key in sorted_keys:
+            items = groups[key]
+            rgb = [it for it in items if ('[PRO ONLY]' not in it[0]) and (' RGB' in it[0])]
+            placeholders_nir = [it for it in items if ('[PRO ONLY]' in it[0]) and (' NIR ' in it[0])]
+            placeholders_ndvi = [it for it in items if ('[PRO ONLY]' in it[0]) and (' NDVI ' in it[0])]
+            placeholders_radar = [it for it in items if ('[PRO ONLY]' in it[0]) and (' RADAR ' in it[0])]
+            others_real = [it for it in items if ('[PRO ONLY]' not in it[0]) and (' RGB' not in it[0])]
+            ordered_items.extend(rgb + placeholders_nir + placeholders_ndvi + placeholders_radar + others_real)
+
+        # Append non-dated items reversed to keep prior overall reverse behavior
+        ordered_items.extend(list(reversed(others)))
+
+        # Rebuild list preserving flags and tooltips
         self.dockwidget.layer_listWidget.clear()
-        
-        # Add items back in the reversed order
-        for item in items:
-            self.dockwidget.layer_listWidget.addItem(item)
+        for text, flags, tooltip in ordered_items:
+            it = QListWidgetItem(text)
+            it.setFlags(flags)
+            if tooltip:
+                it.setToolTip(tooltip)
+            self.dockwidget.layer_listWidget.addItem(it)
 
     def get_layer(self):
+        print("DEBUG: get_layer called, button click registered")  # Debug log
         # re-initializing the layer
         layer = XYZLayerModel()
 
@@ -496,6 +620,7 @@ class NimboEarth:
             # assembling data in list
             data_retrieved = [month, year, composition_string]
             self.layer = self.services.filtering_layers(data_retrieved)
+            print(f"DEBUG: get_layer called, layer={self.layer}")  # Debug log
             if self.layer:
                 self.add_layer(self.layer)
             else:
@@ -506,9 +631,21 @@ class NimboEarth:
 
 
     def add_layer(self, layer):
-        # adding api key and type to layer url
-        layer.href = "type=xyz&url=" + layer.href + "/{z}/{x}/{-y}.png?kermap_token=" + \
-            self.user.api_key
+        # Construct the correct layer identifier in the URL based on user type
+        year = str(layer.year)
+        month_raw = str(layer.month)
+        compo = str(layer.composition)
+        if hasattr(self.user, 'subscription_type') and self.user.subscription_type == 'FREE':
+            month = month_raw  # Do NOT zero-pad
+            layer_id = f"watermark_{year}_{month}_1"
+        else:
+            # PRO: do not zero-pad month
+            month = str(int(month_raw)) if month_raw.isdigit() else month_raw
+            layer_id = f"{year}_{month}_{compo}"
+        # Build the full href using the correct layer_id
+        base_url = layer.href.split('/tms/1.0.0/')[0] + '/tms/1.0.0/'
+        layer.href = f"type=xyz&url={base_url}{layer_id}@kermap/{{z}}/{{x}}/{{-y}}.png?kermap_token={self.user.api_key}"
+        print(f"DEBUG: add_layer called, href={layer.href}")  # Debug log
         if "no title set" in layer.title:
             title = self.services.get_month_name(str(layer.month)) + ' ' + layer.year + ' ' + self.services.get_composition_name(layer.composition)
             rlayer = QgsRasterLayer(layer.href, title, "wms")
