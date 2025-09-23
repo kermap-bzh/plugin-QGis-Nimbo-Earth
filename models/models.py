@@ -33,7 +33,9 @@ class TileMapsModel(QAbstractListModel):
 
 class NimboUser(QAbstractItemModel):
     """a class to get a nimbo user"""
-    def __init__(self, email='', password='', api_key=''):
+    def __init__(self, email='', password='', api_key='', subscription_type=None):
         self.email = email
         self.password = password
         self.api_key = api_key
+        # 'FREE' or 'PRO' (from user-feature-me endpoint)
+        self.subscription_type = subscription_type
