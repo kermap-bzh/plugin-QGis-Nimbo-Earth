@@ -113,6 +113,7 @@ class Services:
             new_layer = {k.replace(u'@', ''): v for k, v in layer.items()}
             # creating the record from the layer dict
             rec = layer_record(**new_layer)
+            
             # filtering for FREE/PRO
             if subscription_type == 'FREE':
                 # getting the year, month and composition of the layer
@@ -151,7 +152,7 @@ class Services:
             if len(parts) < 3:
                 continue
             # adding the layer as XYZLayer to tile maps, excluding special layers
-            if ('water' not in parts) and ('rasterdem' not in parts) and ('copernicus' not in parts):
+            if ('water' not in parts) and ('rasterdem' not in parts) and ('copernicus' not in parts) and ('SR' not in parts):
                 # parts: [year, month, composition]
                 if int(parts[1]) < 10:
                     parts[1] = '0' + parts[1]
