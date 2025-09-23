@@ -140,6 +140,24 @@ class Services:
                     self.tile_maps.layers.append(XYZLayerModel(
                         rec.title, rec.srs, rec.profile, rec.href, year=data[0], month=month, composition=data[2]))
                     self.tile_maps.layers.sort(key=attrgetter('year','month'))
+            # getting the key segment (e.g., '2025_5_1@kermap' or 'watermark_2025_5_1@kermap')
+            key = rec.href.split('/')[6].split('@')[0]
+            # FREE feeds prefix dated keys with 'watermark_'; strip it so parsing is consistent
+            if key.startswith('watermark_'):
+                key = key[len('watermark_'):]
+            # split into parts
+            parts = key.split('_')
+            # Skip non-dated entries or unexpected formats
+            if len(parts) < 3:
+                continue
+            # adding the layer as XYZLayer to tile maps, excluding special layers
+            if ('water' not in parts) and ('rasterdem' not in parts) and ('copernicus' not in parts):
+                # parts: [year, month, composition]
+                if int(parts[1]) < 10:
+                    parts[1] = '0' + parts[1]
+                self.tile_maps.layers.append(XYZLayerModel(
+                    rec.title, rec.srs, rec.profile, rec.href, year=parts[0], month=parts[1], composition=parts[2]))
+                self.tile_maps.layers.sort(key=attrgetter('year','month'))
 
         return self.tile_maps
 
