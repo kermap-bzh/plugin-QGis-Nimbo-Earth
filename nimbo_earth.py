@@ -638,8 +638,6 @@ class NimboEarth:
             month = month_raw  # Do NOT zero-pad
             if int(month_raw) < 10:
                 month = month[1:]
-            else:
-                month = month_raw
             layer_id = f"watermark_{year}_{month}_1"
         else:
             # PRO: do not zero-pad month
