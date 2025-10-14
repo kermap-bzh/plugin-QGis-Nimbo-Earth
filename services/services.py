@@ -117,21 +117,22 @@ class Services:
             # filtering for FREE/PRO
             if subscription_type == 'FREE':
                 # getting the year, month and composition of the layer
-                print(rec.href.split('/'))
+                # print(rec.href.split('/'))
                 data = rec.href.split('/')[6].split('@')[0].split('_')
                 # Only allow watermark services for FREE
                 # Only process if tileset is in expected format: watermark_YEAR_MONTH_COMPO
-                print("DEBUG: Processing data: data={data}")
+                # print("DEBUG: Processing data: data={data}")
                 if len(data) == 4 and data[0].lower() == 'watermark':
                     year, month, compo = data[1], data[2], data[3]
                     # Do NOT zero-pad month for FREE users
                     month = str(int(month)) if month.isdigit() else month
-                    print("DEBUG: Adding layer: year={year}, month={month}, composition={compo}")
+                    # print('month ==>',month)
+                    # print("DEBUG: Adding layer: year={year}, month={month}, composition={compo}")
                     self.tile_maps.layers.append(XYZLayerModel(
                         rec.title, rec.srs, rec.profile, rec.href, year=year, month=month, composition=compo))
                     self.tile_maps.layers.sort(key=attrgetter('year','month'))
             else:
-                print("dans le else a la génération")
+                # print("dans le else a la génération")
                 # getting the year, month and composition of the layer
                 data = rec.href.split('/')[6].split('@')[0].split('_')
                 # PRO or default: all layers except water/rasterdem/copernicus/SR
@@ -226,11 +227,11 @@ class Services:
         return list(months)
 
     def filtering_layers(self, data):
-        print(f"DEBUG: filtering_layers called, data={data}")  # Debug log
+        # print(f"DEBUG: filtering_layers called, data={data}")  # Debug log
         for layer in self.tile_maps.layers:
-            print(f"DEBUG: Comparing layer: month_name={self.get_month_name(layer.month)}, year={layer.year}, composition_name={self.get_composition_name(layer.composition)}")
-            print(f"DEBUG: Against data: month={data[0]}, year={data[1]}, composition={data[2]}")
-            print(f"DEBUG: layer={layer}")  # Debug log
+            # print(f"DEBUG: Comparing layer: month_name={self.get_month_name(layer.month)}, year={layer.year}, composition_name={self.get_composition_name(layer.composition)}")
+            # print(f"DEBUG: Against data: month={data[0]}, year={data[1]}, composition={data[2]}")
+            # print(f"DEBUG: layer={layer}")  # Debug log
             # checking which layer possess this year, month and composition
             if  self.get_month_name(layer.month) == data[0]\
                 and layer.year == data[1] \

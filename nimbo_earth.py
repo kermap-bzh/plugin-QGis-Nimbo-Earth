@@ -347,7 +347,7 @@ class NimboEarth:
             self.user.api_key = self.services.get_kermap_token(access_token)
             # get user subscription type (FREE/PRO)
             self.user.subscription_type = self.services.get_user_subscription_type(access_token)
-            print(self.user.subscription_type)
+            # print(self.user.subscription_type)
         else:
             self.user.api_key = None
             self.user.subscription_type = None
@@ -380,13 +380,11 @@ class NimboEarth:
         # if status is 200 then update the layer selection with the list of urls availables
         # else raising exceptions
         response = requests.get(request_url, headers=headers) 
-        print("avant le if")
         if response.status_code == 200:
             self.get_geocredits(response)
             # Set user subscription type from API key
-            print("check de la souscription")
             self.user.subscription_type = self.services.get_user_subscription_type_from_kermap_token(api_key)
-            print(f"User subscription type: {self.user.subscription_type}")
+            # print(f"User subscription type: {self.user.subscription_type}")
             xml_file = response.content
             self.iface.messageBar().pushMessage(self.tr("Success"), self.tr("Your API key is valid"), level=3, duration=5)
             self.update_layer_selection(xml_file, api_key)
@@ -457,6 +455,7 @@ class NimboEarth:
 
         # populating month combo box depending on year selected
         self.month_selection()
+        print('month_selection =',self.month_selection())
         self.dockwidget.year_comBox.currentTextChanged.connect(self.month_selection)
 
         # adding layers to the listWidget
@@ -589,7 +588,7 @@ class NimboEarth:
             self.dockwidget.layer_listWidget.addItem(it)
 
     def get_layer(self):
-        print("DEBUG: get_layer called, button click registered")  # Debug log
+        # print("DEBUG: get_layer called, button click registered")  # Debug log
         # re-initializing the layer
         layer = XYZLayerModel()
 
@@ -620,7 +619,7 @@ class NimboEarth:
             # assembling data in list
             data_retrieved = [month, year, composition_string]
             self.layer = self.services.filtering_layers(data_retrieved)
-            print(f"DEBUG: get_layer called, layer={self.layer}")  # Debug log
+            # print(f"DEBUG: get_layer called, layer={self.layer}")  # Debug log
             if self.layer:
                 self.add_layer(self.layer)
             else:
@@ -637,6 +636,10 @@ class NimboEarth:
         compo = str(layer.composition)
         if hasattr(self.user, 'subscription_type') and self.user.subscription_type == 'FREE':
             month = month_raw  # Do NOT zero-pad
+            if int(month_raw) < 10:
+                month = month[1:]
+            else:
+                month = month_raw
             layer_id = f"watermark_{year}_{month}_1"
         else:
             # PRO: do not zero-pad month
@@ -645,7 +648,7 @@ class NimboEarth:
         # Build the full href using the correct layer_id
         base_url = layer.href.split('/tms/1.0.0/')[0] + '/tms/1.0.0/'
         layer.href = f"type=xyz&url={base_url}{layer_id}@kermap/{{z}}/{{x}}/{{-y}}.png?kermap_token={self.user.api_key}"
-        print(f"DEBUG: add_layer called, href={layer.href}")  # Debug log
+        # print(f"DEBUG: add_layer called, href={layer.href}")  # Debug log
         if "no title set" in layer.title:
             title = self.services.get_month_name(str(layer.month)) + ' ' + layer.year + ' ' + self.services.get_composition_name(layer.composition)
             rlayer = QgsRasterLayer(layer.href, title, "wms")
