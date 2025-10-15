@@ -130,7 +130,7 @@ class Services:
                     # print("DEBUG: Adding layer: year={year}, month={month}, composition={compo}")
                     self.tile_maps.layers.append(XYZLayerModel(
                         rec.title, rec.srs, rec.profile, rec.href, year=year, month=month, composition=compo))
-                    self.tile_maps.layers.sort(key=attrgetter('year','month'))
+                    self.tile_maps.layers.sort(key=lambda x: (int(x.year), int(x.month)))
             else:
                 # print("dans le else a la génération")
                 # getting the year, month and composition of the layer
@@ -141,26 +141,7 @@ class Services:
                     month = str(int(data[1])) if data[1].isdigit() else data[1]
                     self.tile_maps.layers.append(XYZLayerModel(
                         rec.title, rec.srs, rec.profile, rec.href, year=data[0], month=month, composition=data[2]))
-                    self.tile_maps.layers.sort(key=attrgetter('year','month'))
-            # getting the key segment (e.g., '2025_5_1@kermap' or 'watermark_2025_5_1@kermap')
-            key = rec.href.split('/')[6].split('@')[0]
-            # FREE feeds prefix dated keys with 'watermark_'; strip it so parsing is consistent
-            if key.startswith('watermark_'):
-                key = key[len('watermark_'):]
-            # split into parts
-            parts = key.split('_')
-            # Skip non-dated entries or unexpected formats
-            if len(parts) < 3:
-                continue
-            # adding the layer as XYZLayer to tile maps, excluding special layers
-            if ('water' not in parts) and ('rasterdem' not in parts) and ('copernicus' not in parts) and ('SR' not in parts):
-                # parts: [year, month, composition]
-                if int(parts[1]) < 10:
-                    parts[1] = '0' + parts[1]
-                self.tile_maps.layers.append(XYZLayerModel(
-                    rec.title, rec.srs, rec.profile, rec.href, year=parts[0], month=parts[1], composition=parts[2]))
-                self.tile_maps.layers.sort(key=attrgetter('year','month'))
-
+                    self.tile_maps.layers.sort(key=lambda x: (int(x.year), int(x.month)))
         return self.tile_maps
 
     def get_month_name(self, month):

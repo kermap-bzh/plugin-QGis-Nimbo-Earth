@@ -647,7 +647,7 @@ class NimboEarth:
         for i in range(self.dockwidget.layer_listWidget.count()):
             it = self.dockwidget.layer_listWidget.item(i)
             items_data.append((it.text(), it.flags(), it.toolTip()))
-
+        # print('items_data ===', items_data)
         # If no placeholders, keep simple reverse for backward compatibility
         has_placeholders = any('[PRO ONLY]' in text for (text, _, _) in items_data)
         if not has_placeholders:
@@ -678,7 +678,6 @@ class NimboEarth:
 
         # Sort groups newest first
         sorted_keys = sorted(groups.keys(), key=lambda k: (k[0], k[1]), reverse=True)
-
         # Rebuild list: within each group, put RGB first then placeholders (NIR, NDVI, RADAR)
         ordered_items = []
         for key in sorted_keys:
