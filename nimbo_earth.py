@@ -748,6 +748,8 @@ class NimboEarth:
         compo = str(layer.composition)
         if hasattr(self.user, 'subscription_type') and self.user.subscription_type == 'FREE':
             month = month_raw  # Do NOT zero-pad
+            if int(month_raw) < 10:
+                month = month[1:]
             layer_id = f"watermark_{year}_{month}_1"
         else:
             # PRO: do not zero-pad month
