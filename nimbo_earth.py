@@ -27,8 +27,11 @@ import webbrowser
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt, QSize, QUrl
 from qgis.PyQt.QtGui import QIcon, QPixmap, QDesktopServices
 from qgis.PyQt.QtWidgets import QAction, QLineEdit, QListWidgetItem
-from qgis.core import QgsRasterLayer, QgsProject
+from qgis.core import QgsRasterLayer, QgsProject, QgsNetworkAccessManager
 from qgis.utils import showPluginHelp
+from qgis.PyQt.QtNetwork import QNetworkReply
+from qgis.PyQt.QtCore import QTimer
+
 
 from .constants import ABOUT_URL, SERVICE_URL, ImageComposition
 from .models.models import NimboUser, XYZLayerModel
@@ -90,6 +93,14 @@ class NimboEarth:
 
         self.pluginIsActive = False
         self.dockwidget = None
+        self.last_geocredits = None
+        self._gc_listener_connected = False
+        self._gc_pending_min = None
+        self._gc_debounce = QTimer()
+        self._gc_debounce.setInterval(500)  # 500 ms
+        self._gc_debounce.setSingleShot(True)
+        self._gc_debounce.timeout.connect(self._flush_geocredit_update)
+
 
     # noinspection PyMethodMayBeStatic
 
@@ -226,6 +237,7 @@ class NimboEarth:
 
         # disconnects
         # don't forget to disconnect push buttons otherwise it will run methods multiple times after reopening
+        self.stop_geocredit_listener()
         self.dockwidget.key_pButton.disconnect()
         self.dockwidget.login_pButton.disconnect()
         self.dockwidget.add_map_cbox_pButton.disconnect()
@@ -347,7 +359,6 @@ class NimboEarth:
             self.user.api_key = self.services.get_kermap_token(access_token)
             # get user subscription type (FREE/PRO)
             self.user.subscription_type = self.services.get_user_subscription_type(access_token)
-            # print(self.user.subscription_type)
         else:
             self.user.api_key = None
             self.user.subscription_type = None
@@ -382,9 +393,9 @@ class NimboEarth:
         response = requests.get(request_url, headers=headers) 
         if response.status_code == 200:
             self.get_geocredits(response)
+            self.start_geocredit_listener()  # <<--- nouveau
             # Set user subscription type from API key
             self.user.subscription_type = self.services.get_user_subscription_type_from_kermap_token(api_key)
-            # print(f"User subscription type: {self.user.subscription_type}")
             xml_file = response.content
             self.iface.messageBar().pushMessage(self.tr("Success"), self.tr("Your API key is valid"), level=3, duration=5)
             self.update_layer_selection(xml_file, api_key)
@@ -394,6 +405,7 @@ class NimboEarth:
 
     def get_geocredits(self, response):
         geocredit = int(response.headers['X-Kermap-Available-Credits'])
+        self.last_geocredits = geocredit
         if geocredit >= 1000:
             geocredit = format(geocredit/1000, ".2f")
             label = str(geocredit)+"K"
@@ -403,8 +415,112 @@ class NimboEarth:
             self.dockwidget.geocredit_label.setStyleSheet('QLabel[objectName^="geocredit_label"]{color: red;}')
         self.dockwidget.gc_label.setVisible(True)    
         self.dockwidget.geocredit_label.setText(label)
-        
-        
+
+
+    def start_geocredit_listener(self):
+        if self._gc_listener_connected:
+            return
+        try:
+            nam = QgsNetworkAccessManager.instance()
+            nam.finished.connect(self._on_reply_finished)
+            self._gc_listener_connected = True
+        except Exception as e:
+            print(f"[Nimbo] Failed to start geocredit listener: {e}")
+
+
+    def stop_geocredit_listener(self):
+        """Déconnecte le listener pour éviter les doublons / fuites de signaux."""
+        if not self._gc_listener_connected:
+            return
+        try:
+            nam = QgsNetworkAccessManager.instance()
+            nam.finished.disconnect(self._on_reply_finished)
+            self._gc_listener_connected = False
+        except Exception as e:
+            # Si déjà déconnecté ailleurs, on ignore
+            print(f"[Nimbo] Failed to stop geocredit listener: {e}")
+
+
+    def _on_reply_finished(self, reply):
+        """
+        Callback sur chaque QNetworkReply fini.
+        Si l'en-tête X-Kermap-Available-Credits est présent et a diminué,
+        on met à jour le label.
+        """
+        try:
+            # 1) Récupère l'en-tête s'il existe
+            header_name = b'X-Kermap-Available-Credits'
+            if hasattr(reply, "rawHeader"):
+                raw_val = reply.rawHeader(header_name)
+            else:
+                raw_val = None
+
+            if not raw_val:
+                return  # rien à faire si l'en-tête n’est pas présent
+
+            # 2) Parse int (sécurisé)
+            try:
+                new_val = int(bytes(raw_val).decode("utf-8").strip())
+            except Exception:
+                return
+
+            # 3) Si on n’a pas encore de valeur, on initialise
+            if self.last_geocredits is None:
+                self.last_geocredits = new_val
+                return
+
+            # 4) Mettre à jour uniquement si ça BAISSE
+            if new_val < self.last_geocredits:
+                self._set_geocredit_label(new_val)
+                self.last_geocredits = new_val
+        except Exception as e:
+            print(f"[Nimbo] Error in _on_reply_finished: {e}")
+
+
+    def _set_geocredit_label(self, geocredit_int):
+        """
+        Met à jour le label + couleur exactement comme get_geocredits(),
+        mais à partir d'une valeur entière déjà connue.
+        """
+        try:
+            if geocredit_int >= 1000:
+                label = f"{format(geocredit_int/1000, '.2f')}K"
+                self.dockwidget.geocredit_label.setStyleSheet(
+                    'QLabel[objectName^="geocredit_label"]{color: #00b400;}'
+                )
+            else:
+                label = str(geocredit_int)
+                self.dockwidget.geocredit_label.setStyleSheet(
+                    'QLabel[objectName^="geocredit_label"]{color: red;}'
+                )
+            self.dockwidget.gc_label.setVisible(True)
+            self.dockwidget.geocredit_label.setText(label)
+        except Exception as e:
+            print(f"[Nimbo] Failed to update geocredit label: {e}")
+    
+    def _maybe_queue_geocredit_update(self, new_val: int):
+        if self.last_geocredits is None:
+            self.last_geocredits = new_val
+            return
+        if new_val >= self.last_geocredits:
+            return  # on ne met à jour que si ça baisse
+
+        # On enregistre la plus petite valeur observée pendant la fenêtre
+        if self._gc_pending_min is None or new_val < self._gc_pending_min:
+            self._gc_pending_min = new_val
+
+        if not self._gc_debounce.isActive():
+            self._gc_debounce.start()
+
+    def _flush_geocredit_update(self):
+        if self._gc_pending_min is None:
+            return
+        # Mise à jour réelle du label une seule fois
+        self._set_geocredit_label(self._gc_pending_min)
+        self.last_geocredits = self._gc_pending_min
+        self._gc_pending_min = None
+
+   
     def update_layer_selection(self, xml_file, api_key):
         # getting the tile maps list
         self.tile_maps = self.services.get_tile_maps(xml_file, self.user.subscription_type)
@@ -455,7 +571,6 @@ class NimboEarth:
 
         # populating month combo box depending on year selected
         self.month_selection()
-        print('month_selection =',self.month_selection())
         self.dockwidget.year_comBox.currentTextChanged.connect(self.month_selection)
 
         # adding layers to the listWidget
@@ -532,7 +647,7 @@ class NimboEarth:
         for i in range(self.dockwidget.layer_listWidget.count()):
             it = self.dockwidget.layer_listWidget.item(i)
             items_data.append((it.text(), it.flags(), it.toolTip()))
-
+        # print('items_data ===', items_data)
         # If no placeholders, keep simple reverse for backward compatibility
         has_placeholders = any('[PRO ONLY]' in text for (text, _, _) in items_data)
         if not has_placeholders:
@@ -563,7 +678,6 @@ class NimboEarth:
 
         # Sort groups newest first
         sorted_keys = sorted(groups.keys(), key=lambda k: (k[0], k[1]), reverse=True)
-
         # Rebuild list: within each group, put RGB first then placeholders (NIR, NDVI, RADAR)
         ordered_items = []
         for key in sorted_keys:
@@ -588,7 +702,6 @@ class NimboEarth:
             self.dockwidget.layer_listWidget.addItem(it)
 
     def get_layer(self):
-        # print("DEBUG: get_layer called, button click registered")  # Debug log
         # re-initializing the layer
         layer = XYZLayerModel()
 
@@ -619,7 +732,6 @@ class NimboEarth:
             # assembling data in list
             data_retrieved = [month, year, composition_string]
             self.layer = self.services.filtering_layers(data_retrieved)
-            # print(f"DEBUG: get_layer called, layer={self.layer}")  # Debug log
             if self.layer:
                 self.add_layer(self.layer)
             else:
@@ -646,7 +758,6 @@ class NimboEarth:
         # Build the full href using the correct layer_id
         base_url = layer.href.split('/tms/1.0.0/')[0] + '/tms/1.0.0/'
         layer.href = f"type=xyz&url={base_url}{layer_id}@kermap/{{z}}/{{x}}/{{-y}}.png?kermap_token={self.user.api_key}"
-        # print(f"DEBUG: add_layer called, href={layer.href}")  # Debug log
         if "no title set" in layer.title:
             title = self.services.get_month_name(str(layer.month)) + ' ' + layer.year + ' ' + self.services.get_composition_name(layer.composition)
             rlayer = QgsRasterLayer(layer.href, title, "wms")
