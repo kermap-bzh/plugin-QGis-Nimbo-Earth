@@ -131,18 +131,7 @@ class Services:
                     self.tile_maps.layers.append(XYZLayerModel(
                         rec.title, rec.srs, rec.profile, rec.href, year=year, month=month, composition=compo))
                     self.tile_maps.layers.sort(key=lambda x: (int(x.year), int(x.month)))
-            elif subscription_type == 'PRO':
-                # print("dans le else a la génération")
-                # getting the year, month and composition of the layer
-                data = rec.href.split('/')[6].split('@')[0].split('_')
-                # PRO or default: all layers except water/rasterdem/copernicus/SR
-                if ('water' not in data) and ('rasterdem' not in data) and ('copernicus' not in data) and ('SR' not in data):
-                    # For PRO, do not zero-pad month, always use int
-                    month = str(int(data[1])) if data[1].isdigit() else data[1]
-                    self.tile_maps.layers.append(XYZLayerModel(
-                        rec.title, rec.srs, rec.profile, rec.href, year=data[0], month=month, composition=data[2]))
-                    self.tile_maps.layers.sort(key=lambda x: (int(x.year), int(x.month)))
-            elif subscription_type == 'PRO HD':
+            elif subscription_type == 'PRO' or subscription_type == 'PRO HD':
                 # print("dans le else a la génération")
                 # getting the year, month and composition of the layer
                 data = rec.href.split('/')[6].split('@')[0].split('_')
@@ -155,6 +144,7 @@ class Services:
                     self.tile_maps.layers.append(XYZLayerModel(
                         rec.title, rec.srs, rec.profile, rec.href, year=data[0], month=month, composition=data[2]))
                     self.tile_maps.layers.sort(key=lambda x: (int(x.year), int(x.month)))
+
         return self.tile_maps
 
     def get_month_name(self, month):
@@ -193,7 +183,7 @@ class Services:
         elif composition == "4":
             return ImageComposition.RADAR.__str__()
         elif composition == "5":
-            return ImageComposition.SUPER_RES.__str__()
+            return ImageComposition.HD.__str__()
 
     def get_min_year(self, tile_maps):
         years = self.get_years(tile_maps)
@@ -225,9 +215,11 @@ class Services:
     def filtering_layers(self, data):
         # print(f"DEBUG: filtering_layers called, data={data}")  # Debug log
         for layer in self.tile_maps.layers:
+            # print('=========================')
             # print(f"DEBUG: Comparing layer: month_name={self.get_month_name(layer.month)}, year={layer.year}, composition_name={self.get_composition_name(layer.composition)}")
             # print(f"DEBUG: Against data: month={data[0]}, year={data[1]}, composition={data[2]}")
             # print(f"DEBUG: layer={layer}")  # Debug log
+            # print('=========================')
             # checking which layer possess this year, month and composition
             if  self.get_month_name(layer.month) == data[0]\
                 and layer.year == data[1] \
