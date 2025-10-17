@@ -557,12 +557,19 @@ class NimboEarth:
                 self.dockwidget.composition_selector_comBox.clear()
                 self.dockwidget.composition_selector_comBox.addItem(ImageComposition(1).describe())
                 self.dockwidget.composition_selector_comBox.setCurrentText(ImageComposition.NATURAL.describe())
+            # Only allow RGB, INFRARED, VEGETATION and RADAR for PRO users
+            elif hasattr(self.user, 'subscription_type') and self.user.subscription_type == 'PRO':
+                compositions = self.services.get_composition_from_layers(self.tile_maps)
+                for composition in compositions:
+                    if composition != 5:
+                        self.dockwidget.composition_selector_comBox.addItem(ImageComposition(composition).describe())
+                self.dockwidget.composition_selector_comBox.setCurrentText(ImageComposition.NATURAL.describe())
+            # Allow all compositions for other users (PRO HD)
             else:
                 compositions = self.services.get_composition_from_layers(self.tile_maps)
                 for composition in compositions:
                     self.dockwidget.composition_selector_comBox.addItem(ImageComposition(composition).describe())
                 self.dockwidget.composition_selector_comBox.setCurrentText(ImageComposition.NATURAL.describe())
-
         # populating year combo box if empty
         if self.dockwidget.year_comBox.count() == 0:
             for year in range(self.services.get_min_year(self.tile_maps), self.services.get_max_year(self.tile_maps)+1):
@@ -602,7 +609,7 @@ class NimboEarth:
                 except Exception:
                     comp_name = ''
 
-            # If user is FREE, ignore real non-RGB compositions (NIR/NDVI/RADAR)
+            # If user is FREE, ignore real non-RGB compositions (NIR/NDVI/RADAR/HD)
             if (getattr(self.user, 'subscription_type', None) == 'FREE') and comp_name != ImageComposition.NATURAL.__str__():
                 # Skip adding the actual item for non-RGB
                 pass
@@ -617,12 +624,26 @@ class NimboEarth:
                     ImageComposition.INFRARED.__str__(),
                     ImageComposition.VEGETATION.__str__(),
                     ImageComposition.RADAR.__str__(),
+                    ImageComposition.HD.__str__(),
                 ]:
                     text = f"{month_name} {year} {comp_label} [PAID PLAN ONLY]"
                     item = QListWidgetItem(text)
                     item.setFlags(item.flags() & ~Qt.ItemIsEnabled & ~Qt.ItemIsSelectable)
                     item.setToolTip(self.tr("This layer is available with PAID plans only."))
                     self.dockwidget.layer_listWidget.addItem(item)
+            # Interleave placeholders if user is PRO and this is a dated RGB (only for HD since PRO doesn't have access)
+            if (getattr(self.user, 'subscription_type', None) == 'PRO') and comp_name == ImageComposition.NATURAL.__str__() and getattr(layer, 'year', '') and getattr(layer, 'month', ''):
+                month_name = self.services.get_month_name(str(layer.month))
+                year = str(layer.year)
+                for comp_label in [
+                    ImageComposition.HD.__str__(),
+                ]:
+                    text = f"{month_name} {year} {comp_label} [PAID PLAN ONLY]"
+                    item = QListWidgetItem(text)
+                    item.setFlags(item.flags() & ~Qt.ItemIsEnabled & ~Qt.ItemIsSelectable)
+                    item.setToolTip(self.tr("This layer is available with PAID plans only."))
+                    self.dockwidget.layer_listWidget.addItem(item)
+            # Note: PRO HD users don't get placeholders for HD since they have access to it
         self.reverse_sort_layers()
             
 
@@ -686,8 +707,9 @@ class NimboEarth:
             placeholders_nir = [it for it in items if ('[PRO ONLY]' in it[0]) and (' NIR ' in it[0])]
             placeholders_ndvi = [it for it in items if ('[PRO ONLY]' in it[0]) and (' NDVI ' in it[0])]
             placeholders_radar = [it for it in items if ('[PRO ONLY]' in it[0]) and (' RADAR ' in it[0])]
+            placeholders_HD = [it for it in items if ('[PRO ONLY]' in it[0]) and (' SUPER RESOLUTION' in it[0])]
             others_real = [it for it in items if ('[PRO ONLY]' not in it[0]) and (' RGB' not in it[0])]
-            ordered_items.extend(rgb + placeholders_nir + placeholders_ndvi + placeholders_radar + others_real)
+            ordered_items.extend(rgb + placeholders_nir + placeholders_ndvi + placeholders_radar + placeholders_HD + others_real)
 
         # Append non-dated items reversed to keep prior overall reverse behavior
         ordered_items.extend(list(reversed(others)))
