@@ -27,6 +27,7 @@ class ImageComposition(Enum):
     INFRARED = 2, "NIR"
     VEGETATION = 3, "NDVI"
     RADAR = 4, "RADAR"
+    HD = 5, "HD"
 
     def describe(self):
         return self.name.capitalize()
