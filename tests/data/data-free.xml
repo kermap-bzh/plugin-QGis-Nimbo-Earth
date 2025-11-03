@@ -1,0 +1,18 @@
+<TileMapService version="1.0.0">
+  <TileMaps>
+<TileMap title="March 2025 RGB" srs="EPSG:3857" profile="none" href="https://prod-data.nimbo.earth/mapcache/tms/1.0.0/watermark_2025_3_1@kermap"/>
+    <TileMap title="March 2025 NDVI" srs="EPSG:3857" profile="none" href="https://prod-data.nimbo.earth/mapcache/tms/1.0.0/watermark_2025_3_3@kermap"/>
+    <TileMap title="March 2025 NIR" srs="EPSG:3857" profile="none" href="https://prod-data.nimbo.earth/mapcache/tms/1.0.0/watermark_2025_3_2@kermap"/>
+    <TileMap title="March 2025 RADAR" srs="EPSG:3857" profile="none" href="https://prod-data.nimbo.earth/mapcache/tms/1.0.0/watermark_2025_3_4@kermap"/>
+    <TileMap title="April 2025 RGB" srs="EPSG:3857" profile="none" href="https://prod-data.nimbo.earth/mapcache/tms/1.0.0/watermark_2025_4_1@kermap"/>
+    <TileMap title="April 2025 NDVI" srs="EPSG:3857" profile="none" href="https://prod-data.nimbo.earth/mapcache/tms/1.0.0/watermark_2025_4_3@kermap"/>
+    <TileMap title="April 2025 NIR" srs="EPSG:3857" profile="none" href="https://prod-data.nimbo.earth/mapcache/tms/1.0.0/watermark_2025_4_2@kermap"/>
+    <TileMap title="April 2025 RADAR" srs="EPSG:3857" profile="none" href="https://prod-data.nimbo.earth/mapcache/tms/1.0.0/watermark_2025_4_4@kermap"/>
+    <TileMap title="June 2025 RGB" srs="EPSG:3857" profile="none" href="https://prod-data.nimbo.earth/mapcache/tms/1.0.0/watermark_2025_6_1@kermap"/>
+    <TileMap title="June 2025 NIR" srs="EPSG:3857" profile="none" href="https://prod-data.nimbo.earth/mapcache/tms/1.0.0/watermark_2025_6_2@kermap"/>
+    <TileMap title="June 2025 NDVI" srs="EPSG:3857" profile="none" href="https://prod-data.nimbo.earth/mapcache/tms/1.0.0/watermark_2025_6_3@kermap"/>
+    <TileMap title="June 2025 RADAR" srs="EPSG:3857" profile="none" href="https://prod-data.nimbo.earth/mapcache/tms/1.0.0/watermark_2025_6_4@kermap"/>
+    <TileMap title="Copernicus DEM" srs="EPSG:3857" profile="none" href="https://prod-data.nimbo.earth/mapcache/tms/1.0.0/copernicus_DEM@kermap"/>
+    <TileMap title="Water RGB" srs="EPSG:3857" profile="none" href="https://prod-data.nimbo.earth/mapcache/tms/1.0.0/water_1@kermap"/>
+  </TileMaps>
+</TileMapService>
