@@ -227,6 +227,64 @@ class NimboEarth:
         help_path = os.path.join(abs_path, 'help/build/html/index.html')
         help_file = 'file:///'+help_path
         QDesktopServices.openUrl(QUrl(help_file))
+
+    def disconnect_all_signals(self):
+        """Disconnect all signal connections to prevent multiple bindings."""
+        if self.dockwidget is None:
+            return
+            
+        try:
+            self.dockwidget.free_pButton.clicked.disconnect()
+        except TypeError:
+            pass
+        try:
+            self.dockwidget.subscribe_pButton.clicked.disconnect()
+        except TypeError:
+            pass
+        try:
+            self.dockwidget.pricing_pButton.clicked.disconnect()
+        except TypeError:
+            pass
+        try:
+            self.dockwidget.pricing_link.clicked.disconnect()
+        except TypeError:
+            pass
+        try:
+            self.dockwidget.eye_pButton.pressed.disconnect()
+        except TypeError:
+            pass
+        try:
+            self.dockwidget.eye_pButton.released.disconnect()
+        except TypeError:
+            pass
+        try:
+            self.dockwidget.login_pButton.clicked.disconnect()
+        except TypeError:
+            pass
+        try:
+            self.dockwidget.key_pButton.clicked.disconnect()
+        except TypeError:
+            pass
+        try:
+            self.dockwidget.composition_selector_comBox.currentTextChanged.disconnect()
+        except TypeError:
+            pass
+        try:
+            self.dockwidget.month_comBox.currentTextChanged.disconnect()
+        except TypeError:
+            pass
+        try:
+            self.dockwidget.year_comBox.currentTextChanged.disconnect()
+        except TypeError:
+            pass
+        try:
+            self.dockwidget.add_map_cbox_pButton.clicked.disconnect()
+        except TypeError:
+            pass
+        try:
+            self.dockwidget.add_map_list_pButton.clicked.disconnect()
+        except TypeError:
+            pass
     # --------------------------------------------------------------------------
 
 
@@ -238,10 +296,7 @@ class NimboEarth:
         # disconnects
         # don't forget to disconnect push buttons otherwise it will run methods multiple times after reopening
         self.stop_geocredit_listener()
-        self.dockwidget.key_pButton.disconnect()
-        self.dockwidget.login_pButton.disconnect()
-        self.dockwidget.add_map_cbox_pButton.disconnect()
-        self.dockwidget.add_map_list_pButton.disconnect()
+        self.disconnect_all_signals()
         self.dockwidget.closingPlugin.disconnect(self.onClosePlugin)
         
 
@@ -284,6 +339,9 @@ class NimboEarth:
                 self.dockwidget = NimboEarthDockWidget()
                 get_style(self.dockwidget)
 
+            # Disconnect existing connections first to prevent multiple bindings
+            self.disconnect_all_signals()
+            
             # setting free basemap button event
             self.dockwidget.free_pButton.clicked.connect(self.addFreeLayer)
             
@@ -327,6 +385,12 @@ class NimboEarth:
             self.dockwidget.add_map_list_pButton.clicked.connect(self.get_layer)
 
             # connect to provide cleanup on closing of dockwidget
+            # Disconnect first to avoid multiple connections
+            try:
+                self.dockwidget.closingPlugin.disconnect(self.onClosePlugin)
+            except TypeError:
+                # No connection exists yet, which is fine
+                pass
             self.dockwidget.closingPlugin.connect(self.onClosePlugin)
 
             # show the dockwidget
