@@ -616,11 +616,13 @@ class NimboEarth:
     def populating_cbboxes_and_listwidget(self):
         # populating image composition combo box if empty
         if self.dockwidget.composition_selector_comBox.count() == 0:
-            # Only allow RGB for FREE/watermark users
+            # Only allow RGB && HD for FREE/watermark users
             if hasattr(self.user, 'subscription_type') and self.user.subscription_type == 'FREE':
-                self.dockwidget.composition_selector_comBox.clear()
-                self.dockwidget.composition_selector_comBox.addItem(ImageComposition(1).describe())
-                self.dockwidget.composition_selector_comBox.setCurrentText(ImageComposition.NATURAL.describe())
+                compositions = self.services.get_composition_from_layers(self.tile_maps)
+                for composition in compositions:
+                    if composition == 5 or composition == 1:
+                        self.dockwidget.composition_selector_comBox.addItem(ImageComposition(composition).describe())
+                self.dockwidget.composition_selector_comBox.setCurrentText(ImageComposition.HD.describe())
             # Only allow RGB, INFRARED, VEGETATION and RADAR for PRO users
             elif hasattr(self.user, 'subscription_type') and self.user.subscription_type == 'PRO':
                 compositions = self.services.get_composition_from_layers(self.tile_maps)
@@ -674,7 +676,7 @@ class NimboEarth:
                     comp_name = ''
 
             # If user is FREE, ignore real non-RGB compositions (NIR/NDVI/RADAR/HD)
-            if (getattr(self.user, 'subscription_type', None) == 'FREE') and comp_name != ImageComposition.NATURAL.__str__():
+            if (getattr(self.user, 'subscription_type', None) == 'FREE') and comp_name != ImageComposition.NATURAL.__str__() and comp_name != ImageComposition.HD.__str__():
                 # Skip adding the actual item for non-RGB
                 pass
             else:
@@ -688,7 +690,6 @@ class NimboEarth:
                     ImageComposition.INFRARED.__str__(),
                     ImageComposition.VEGETATION.__str__(),
                     ImageComposition.RADAR.__str__(),
-                    ImageComposition.HD.__str__(),
                 ]:
                     text = f"{month_name} {year} {comp_label} [PAID PLAN ONLY]"
                     item = QListWidgetItem(text)
@@ -833,7 +834,7 @@ class NimboEarth:
         month_raw = str(layer.month)
         compo = str(layer.composition)
         if hasattr(self.user, 'subscription_type') and self.user.subscription_type == 'FREE':
-            layer_id = f"watermark_{year}_{month_raw}_1"
+            layer_id = f"watermark_{year}_{month_raw}_{compo}"
         else:
             # PRO: do not zero-pad month
             month = str(int(month_raw)) if month_raw.isdigit() else month_raw

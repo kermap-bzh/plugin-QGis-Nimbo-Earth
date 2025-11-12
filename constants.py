@@ -6,6 +6,8 @@ from aenum import Enum
 
 # base service URLs
 
+MAX_COMPO = 5
+
 ABOUT_URL = 'https://nimbo.earth'
 
 SERVICE_URL = 'https://prod-data.nimbo.earth/mapcache/tms/1.0.0?kermap_token='

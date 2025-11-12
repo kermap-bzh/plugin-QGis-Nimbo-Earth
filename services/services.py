@@ -8,7 +8,7 @@ from operator import attrgetter
 
 from ..models.models import XYZLayerModel, TileMapsModel
 from .checks import Checks
-from ..constants import USER_URL, ImageComposition
+from ..constants import USER_URL, ImageComposition, MAX_COMPO
 
 
 class Services:
@@ -99,7 +99,6 @@ class Services:
     def get_tile_maps(self, xml_file, subscription_type=None):
         # clearing the tile_maps_list
         self.tile_maps.layers.clear()
-        
         # turning the xml to dict
         tms_dict = xmltodict.parse(xml_file)
 
@@ -136,10 +135,8 @@ class Services:
                 # getting the year, month and composition of the layer
                 data = rec.href.split('/')[6].split('@')[0].split('_')
                 # PRO or default: all layers except water/rasterdem/copernicus/SR
-                if ('water' not in data) and ('rasterdem' not in data) and ('copernicus' not in data):
+                if ('water' not in data) and ('rasterdem' not in data) and ('copernicus' not in data) and ('demo' not in data) and (int(data[2]) <= MAX_COMPO):
                     # For PRO, do not zero-pad month, always use int
-                    if ('SR' in data):
-                        data.remove('SR')
                     month = str(int(data[1])) if data[1].isdigit() else data[1]
                     self.tile_maps.layers.append(XYZLayerModel(
                         rec.title, rec.srs, rec.profile, rec.href, year=data[0], month=month, composition=data[2]))
