@@ -135,7 +135,6 @@ class Services:
                 # getting the year, month and composition of the layer
                 data = rec.href.split('/')[6].split('@')[0].split('_')
                 # PRO or default: all layers except water/rasterdem/copernicus/SR
-                print(data)
                 if ('water' not in data) and ('rasterdem' not in data) and ('copernicus' not in data) and ('demo' not in data) and (int(data[2]) <= MAX_COMPO):
                     # For PRO, do not zero-pad month, always use int
                     month = str(int(data[1])) if data[1].isdigit() else data[1]
