@@ -21,14 +21,28 @@
  *                                                                         *
  ***************************************************************************/
 """
+
 import webbrowser
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt, QUrl
 from qgis.PyQt.QtGui import QIcon, QPixmap, QDesktopServices, QCursor
 from qgis.PyQt.QtWidgets import QAction, QLineEdit, QListWidgetItem
-from qgis.core import Qgis, QgsRasterLayer, QgsProject, QgsNetworkAccessManager, QgsMessageLog
+from qgis.core import (
+    Qgis,
+    QgsRasterLayer,
+    QgsProject,
+    QgsNetworkAccessManager,
+    QgsMessageLog,
+)
 
 
-from .constants import ABOUT_URL, NIMBO_WATERMARK_LABEL, PAID_PLAN_LABEL, SERVICE_URL, MAPS_URL, PRICING_URL
+from .constants import (
+    ABOUT_URL,
+    NIMBO_WATERMARK_LABEL,
+    PAID_PLAN_LABEL,
+    SERVICE_URL,
+    MAPS_URL,
+    PRICING_URL,
+)
 from .models.models import NimboUser, XYZLayerModel
 from .services.checks import Checks
 from .services.services import Services
@@ -55,7 +69,7 @@ class NimboEarth:
 
         Parameters
         ----------
-        iface : QgsInterface 
+        iface : QgsInterface
             An interface instance that will be passed to this class
             which provides the hook by which you can manipulate the QGIS
             application at run time.
@@ -71,11 +85,10 @@ class NimboEarth:
         self.plugin_dir = os.path.dirname(__file__)
 
         # Initialize locale
-        locale = QSettings().value('locale/userLocale')[0:2]
+        locale = QSettings().value("locale/userLocale")[0:2]
         locale_path = os.path.join(
-            self.plugin_dir,
-            'i18n',
-            'NimboEarth_{}.qm'.format(locale))
+            self.plugin_dir, "i18n", "NimboEarth_{}.qm".format(locale)
+        )
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
@@ -84,16 +97,15 @@ class NimboEarth:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&Nimbo Earth')
+        self.menu = self.tr("&Nimbo Earth")
         # TODO: We are going to let the user set this up in a future iteration
-        self.toolbar = self.iface.addToolBar(u'NimboEarth')
-        self.toolbar.setObjectName(u'NimboEarth')
+        self.toolbar = self.iface.addToolBar("NimboEarth")
+        self.toolbar.setObjectName("NimboEarth")
 
         self.pluginIsActive = False
         self.dockwidget = None
         self.last_geocredits = None
         self._gc_listener_connected = False
-
 
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
@@ -111,20 +123,20 @@ class NimboEarth:
             Translated version of message.
         """
         # Noinspection PyTypeChecker,PyArgumentList,PyCallByClass
-        return QCoreApplication.translate('NimboEarth', message)
-
+        return QCoreApplication.translate("NimboEarth", message)
 
     def add_action(
-            self,
-            icon_path,
-            text,
-            callback,
-            enabled_flag=True,
-            add_to_menu=True,
-            add_to_toolbar=True,
-            status_tip=None,
-            whats_this=None,
-            parent=None):
+        self,
+        icon_path,
+        text,
+        callback,
+        enabled_flag=True,
+        add_to_menu=True,
+        add_to_toolbar=True,
+        status_tip=None,
+        whats_this=None,
+        parent=None,
+    ):
         """
         Add a toolbar icon to the toolbar.
 
@@ -184,52 +196,48 @@ class NimboEarth:
 
         return action
 
-
     def initGui(self):
         """
         Create the menu entries and toolbar icons inside the QGIS GUI.
         """
 
         # Add actions to the toolbar
-        icon_path = ':/plugins/nimbo_earth/assets/icon.png'
+        icon_path = ":/plugins/nimbo_earth/assets/icon.png"
         self.add_action(
             icon_path,
-            text=self.tr(u'Nimbo\'s Earth Basemaps'),
+            text=self.tr("Nimbo's Earth Basemaps"),
             callback=self.run,
-            parent=self.iface.mainWindow()
+            parent=self.iface.mainWindow(),
         )
         self.add_action(
-            icon_path=':/plugins/nimbo_earth/assets/icon.png',
-            text=self.tr(u'About Nimbo'),
+            icon_path=":/plugins/nimbo_earth/assets/icon.png",
+            text=self.tr("About Nimbo"),
             callback=self.go_to_about,
             parent=self.iface.mainWindow(),
-            add_to_toolbar=False
+            add_to_toolbar=False,
         )
         self.add_action(
-            icon_path=':/plugins/nimbo_earth/assets/question.png',
-            text=self.tr(u'Plugin help'),
+            icon_path=":/plugins/nimbo_earth/assets/question.png",
+            text=self.tr("Plugin help"),
             callback=self.go_to_help,
             parent=self.iface.mainWindow(),
-            add_to_toolbar=False
+            add_to_toolbar=False,
         )
-
 
     def go_to_about(self):
         """
         Open the about page
         """
         webbrowser.open(ABOUT_URL)
-    
-    
+
     def go_to_help(self):
         """
         Open the help page
         """
         abs_path = os.path.dirname(os.path.abspath(__file__))
-        help_path = os.path.join(abs_path, 'help/build/html/index.html')
-        help_file = 'file:///'+help_path
+        help_path = os.path.join(abs_path, "help/build/html/index.html")
+        help_file = "file:///" + help_path
         QDesktopServices.openUrl(QUrl(help_file))
-
 
     def _get_signals(self):
         """
@@ -247,12 +255,14 @@ class NimboEarth:
             (self.dockwidget.APIKey_lineEdit.textChanged, self.check_api_key_field),
             (self.dockwidget.login_pButton.clicked, self.login),
             (self.dockwidget.APIKey_pButton.clicked, self.validate_api_key),
-            (self.dockwidget.composition_comBox.currentTextChanged, self.filter_layer_list),
+            (
+                self.dockwidget.composition_comBox.currentTextChanged,
+                self.filter_layer_list,
+            ),
             (self.dockwidget.month_comBox.currentTextChanged, self.filter_layer_list),
             (self.dockwidget.year_comBox.currentTextChanged, self.filter_layer_list),
-            (self.dockwidget.addLayer_pButton.clicked, self.get_layer)
+            (self.dockwidget.addLayer_pButton.clicked, self.get_layer),
         ]
-
 
     def _disconnect_all_signals(self):
         """
@@ -264,7 +274,6 @@ class NimboEarth:
             except:
                 pass
 
-
     def _connect_all_signals(self):
         """
         Connect all signal connections.
@@ -272,13 +281,11 @@ class NimboEarth:
         for signal, method in self._get_signals():
             signal.connect(method)
 
-
     def _open_signup(self):
         """
         Open the signup page
         """
-        webbrowser.open(MAPS_URL + '/signup')
-
+        webbrowser.open(MAPS_URL + "/signup")
 
     def _open_pricing(self):
         """
@@ -286,13 +293,11 @@ class NimboEarth:
         """
         webbrowser.open(PRICING_URL)
 
-
     def _open_dashboard(self):
         """
         Open the dashboard page to get API key
         """
-        webbrowser.open(MAPS_URL + '/myNimbo/dashboard')
-
+        webbrowser.open(MAPS_URL + "/myNimbo/dashboard")
 
     def onClosePlugin(self):
         """
@@ -304,7 +309,6 @@ class NimboEarth:
         self.stop_geocredit_listener()
         self._disconnect_all_signals()
         self.dockwidget.closingPlugin.disconnect(self.onClosePlugin)
-        
 
         # remove this statement if dockwidget is to remain
         # for reuse if plugin is reopened
@@ -314,18 +318,16 @@ class NimboEarth:
 
         self.pluginIsActive = False
 
-
     def unload(self):
         """
         Removes the plugin menu item and icon from QGIS GUI.
         """
 
         for action in self.actions:
-            self.iface.removePluginWebMenu(self.tr(u'&Nimbo Earth'),action)
+            self.iface.removePluginWebMenu(self.tr("&Nimbo Earth"), action)
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
         del self.toolbar
-
 
     def _cursor_elements(self):
         """
@@ -352,9 +354,9 @@ class NimboEarth:
             self.dockwidget.composition_comBox,
             self.dockwidget.month_comBox,
             self.dockwidget.year_comBox,
-            self.dockwidget.tabWidget_Main.tabBar()
+            self.dockwidget.tabWidget_Main.tabBar(),
         ]
-    
+
     def setCursor(self):
         """
         Set cursor for buttons
@@ -385,19 +387,35 @@ class NimboEarth:
 
             # Set cursor for buttons
             self.setCursor()
-            
+
             # Set icons for links
-            self.dockwidget.nimbo_icon_label.setPixmap(QPixmap(":/plugins/nimbo_earth/assets/icon.png"))
-            self.dockwidget.kermap_icon_label.setPixmap(QPixmap(":/plugins/nimbo_earth/assets/kermapLogo.png"))
+            self.dockwidget.nimbo_icon_label.setPixmap(
+                QPixmap(":/plugins/nimbo_earth/assets/icon.png")
+            )
+            self.dockwidget.kermap_icon_label.setPixmap(
+                QPixmap(":/plugins/nimbo_earth/assets/kermapLogo.png")
+            )
 
             # Set text for links
-            self.dockwidget.nimbo_label.setText('<a style="color: white; font-weight:bold;text-decoration: none;" href="https://nimbo.earth">{0}</a>'.format(self.tr("About Nimbo")))
+            self.dockwidget.nimbo_label.setText(
+                '<a style="color: white; font-weight:bold;text-decoration: none;" href="https://nimbo.earth">{0}</a>'.format(
+                    self.tr("About Nimbo")
+                )
+            )
             self.dockwidget.nimbo_label.setOpenExternalLinks(True)
-            self.dockwidget.kermap_label.setText('<a style="color: white; font-weight:bold; text-decoration: none;" href="https://kermap.com/en/our-story/">{0}</a>'.format(self.tr("About Kermap")))
+            self.dockwidget.kermap_label.setText(
+                '<a style="color: white; font-weight:bold; text-decoration: none;" href="https://kermap.com/en/our-story/">{0}</a>'.format(
+                    self.tr("About Kermap")
+                )
+            )
             self.dockwidget.kermap_label.setOpenExternalLinks(True)
 
-            #Set corner label
-            self.dockwidget.corner_label.setText('<a style="color: #3070E1; font-size: 14px; font-weight:bold; text-decoration: underline;" href="https://support-form.kermap.com/">{0}</a>'.format(self.tr("Support")))
+            # Set corner label
+            self.dockwidget.corner_label.setText(
+                '<a style="color: #3070E1; font-size: 14px; font-weight:bold; text-decoration: underline;" href="https://support-form.kermap.com/">{0}</a>'.format(
+                    self.tr("Help")
+                )
+            )
             self.dockwidget.corner_label.setOpenExternalLinks(True)
 
             # Disable second tab widget
@@ -408,7 +426,10 @@ class NimboEarth:
 
             # Disable login button until login fields are filled
             self.dockwidget.login_pButton.setEnabled(False)
-            if (self.dockwidget.email_lineEdit.text().strip() and self.dockwidget.password_lineEdit.text().strip()):
+            if (
+                self.dockwidget.email_lineEdit.text().strip()
+                and self.dockwidget.password_lineEdit.text().strip()
+            ):
                 self.dockwidget.login_pButton.setEnabled(True)
                 self.dockwidget.login_pButton.setStyleSheet("background-color: #3070E1")
             else:
@@ -416,21 +437,29 @@ class NimboEarth:
 
             # Disable API key button until API key field is filled
             self.dockwidget.APIKey_pButton.setEnabled(False)
-            if (self.dockwidget.APIKey_lineEdit.text().strip()):
+            if self.dockwidget.APIKey_lineEdit.text().strip():
                 self.dockwidget.APIKey_pButton.setEnabled(True)
-                self.dockwidget.APIKey_pButton.setStyleSheet("background-color: #3070E1")
+                self.dockwidget.APIKey_pButton.setStyleSheet(
+                    "background-color: #3070E1"
+                )
             else:
-                self.dockwidget.APIKey_pButton.setStyleSheet("background-color: #7498d6")
+                self.dockwidget.APIKey_pButton.setStyleSheet(
+                    "background-color: #7498d6"
+                )
 
             # Set default tab
             self.dockwidget.tabWidget_Main.setCurrentWidget(self.dockwidget.API_key_tab)
 
             # Set password visibility
             self.dockwidget.password_lineEdit.setEchoMode(QLineEdit.EchoMode.Password)
-            self.dockwidget.eye_pButton.setIcon(QIcon(QPixmap(":/plugins/nimbo_earth/assets/eye-off.png")))
+            self.dockwidget.eye_pButton.setIcon(
+                QIcon(QPixmap(":/plugins/nimbo_earth/assets/eye-off.png"))
+            )
 
             # Set dashboard icon
-            self.dockwidget.dashboard_pButton.setIcon(QIcon(QPixmap(":/plugins/nimbo_earth/assets/link.png")))
+            self.dockwidget.dashboard_pButton.setIcon(
+                QIcon(QPixmap(":/plugins/nimbo_earth/assets/link.png"))
+            )
 
             # Connect to provide cleanup on closing of dockwidget
             # Disconnect first to avoid multiple connections
@@ -439,13 +468,14 @@ class NimboEarth:
             except TypeError:
                 # No connection exists yet, which is fine
                 pass
-            
+
             self.dockwidget.closingPlugin.connect(self.onClosePlugin)
 
             # Show the dockwidget
-            self.iface.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.dockwidget)
+            self.iface.addDockWidget(
+                Qt.DockWidgetArea.RightDockWidgetArea, self.dockwidget
+            )
             self.dockwidget.show()
-
 
     def show_password(self):
         """
@@ -454,24 +484,28 @@ class NimboEarth:
         # Change password visibility and icon depending on current state
         if self.dockwidget.password_lineEdit.echoMode() == QLineEdit.EchoMode.Password:
             self.dockwidget.password_lineEdit.setEchoMode(QLineEdit.EchoMode.Normal)
-            self.dockwidget.eye_pButton.setIcon(QIcon(QPixmap(":/plugins/nimbo_earth/assets/eye.png")))
+            self.dockwidget.eye_pButton.setIcon(
+                QIcon(QPixmap(":/plugins/nimbo_earth/assets/eye.png"))
+            )
         else:
             self.dockwidget.password_lineEdit.setEchoMode(QLineEdit.EchoMode.Password)
-            self.dockwidget.eye_pButton.setIcon(QIcon(QPixmap(":/plugins/nimbo_earth/assets/eye-off.png")))
-    
+            self.dockwidget.eye_pButton.setIcon(
+                QIcon(QPixmap(":/plugins/nimbo_earth/assets/eye-off.png"))
+            )
 
     def check_login_field(self):
         """
         Check login fields
         """
-        # Check if the email is provided and valid and if the password is provided 
-        ok = bool(self.dockwidget.email_lineEdit.text().strip()) and bool(self.dockwidget.password_lineEdit.text().strip())
+        # Check if the email is provided and valid and if the password is provided
+        ok = bool(self.dockwidget.email_lineEdit.text().strip()) and bool(
+            self.dockwidget.password_lineEdit.text().strip()
+        )
         # Enable or disable login button accordingly and change color
         self.dockwidget.login_pButton.setStyleSheet(
             "background-color: #3070E1" if ok else "background-color: #7498d6"
         )
         self.dockwidget.login_pButton.setEnabled(ok)
-
 
     def check_api_key_field(self):
         """
@@ -485,7 +519,6 @@ class NimboEarth:
         )
         self.dockwidget.APIKey_pButton.setEnabled(ok)
 
-
     def login(self):
         """
         Get API key and access token from login
@@ -497,76 +530,120 @@ class NimboEarth:
         # Try to get access token
         try:
             # Get access_token with services
-            self.user.access_token = self.services.get_access_token(self.user.email, self.user.password)
+            self.user.access_token = self.services.get_access_token(
+                self.user.email, self.user.password
+            )
         except Exception as e:
-            if '401' in str(e):
-                self.iface.messageBar().pushMessage(self.tr("Error"), self.tr(f"Incorrect email or password"), level=Qgis.MessageLevel.Critical, duration=5)
+            if "401" in str(e):
+                self.iface.messageBar().pushMessage(
+                    self.tr("Error"),
+                    self.tr(f"Incorrect email or password"),
+                    level=Qgis.MessageLevel.Critical,
+                    duration=5,
+                )
                 QgsMessageLog.logMessage(str(e), level=Qgis.MessageLevel.Critical)
-            elif 'email is not valid' in str(e):
-                self.iface.messageBar().pushMessage(self.tr("Error"), self.tr(f"Incorrect syntax for email"), level=Qgis.MessageLevel.Critical, duration=5)
+            elif "email is not valid" in str(e):
+                self.iface.messageBar().pushMessage(
+                    self.tr("Error"),
+                    self.tr(f"Incorrect syntax for email"),
+                    level=Qgis.MessageLevel.Critical,
+                    duration=5,
+                )
                 QgsMessageLog.logMessage(str(e), level=Qgis.MessageLevel.Critical)
             else:
-                self.iface.messageBar().pushMessage(self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5)
+                self.iface.messageBar().pushMessage(
+                    self.tr("Error"),
+                    str(e),
+                    level=Qgis.MessageLevel.Critical,
+                    duration=5,
+                )
                 QgsMessageLog.logMessage(str(e), level=Qgis.MessageLevel.Critical)
             return
-        
+
         # Try to get kermap token
         try:
             # Get kermap token (API key)
             self.user.api_key = self.services.get_kermap_token(self.user.access_token)
         except Exception as e:
-            self.iface.messageBar().pushMessage(self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5)
+            self.iface.messageBar().pushMessage(
+                self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5
+            )
             QgsMessageLog.logMessage(str(e), level=Qgis.MessageLevel.Critical)
             return
 
         # Send API key to connect to Nimbo Earth Maps
         self.send_api_key()
-
 
     def validate_api_key(self):
         """
         Get API key from api key line edit
         """
         # Reset API key
-        self.user.api_key = ''
+        self.user.api_key = ""
         # Get API key from line edit
         self.user.api_key = self.dockwidget.APIKey_lineEdit.text().strip()
         # Send API key to connect to Nimbo Earth Maps
         self.send_api_key()
 
-
     def send_api_key(self):
         """
         Send API key to Kermap backend and update layer selection
         """
-        
+
         # Try to get user informations and update layer selection
         try:
             # Make a request with the url to see if the response status is 200 or not
             response = self.services.get_user_informations(self.user.api_key)
             # If the response is None, show error message
             if response is None:
-                self.iface.messageBar().pushMessage(self.tr("Error"), self.tr(f"Your API Key is not valid"), level=Qgis.MessageLevel.Critical, duration=5)
-                QgsMessageLog.logMessage(f"Your API Key is not valid", level=Qgis.MessageLevel.Critical)
+                self.iface.messageBar().pushMessage(
+                    self.tr("Error"),
+                    self.tr(f"Your API Key is not valid"),
+                    level=Qgis.MessageLevel.Critical,
+                    duration=5,
+                )
+                QgsMessageLog.logMessage(
+                    f"Your API Key is not valid", level=Qgis.MessageLevel.Critical
+                )
                 return
             # Update the layer selection with the list of urls availables and geocredits
             if response.status_code == 200:
-                self.update_geocredits_label(int(response.headers['X-Kermap-Available-Credits']))
+                self.update_geocredits_label(
+                    int(response.headers["X-Kermap-Available-Credits"])
+                )
                 self.start_geocredit_listener()
                 # Set user subscription type from API key
-                self.user.subscription_type = self.services.get_user_subscription_type_from_kermap_token(self.user.api_key)
+                self.user.subscription_type = (
+                    self.services.get_user_subscription_type_from_kermap_token(
+                        self.user.api_key
+                    )
+                )
                 xml_file = response.content
-                self.iface.messageBar().pushMessage(self.tr("Success"), self.tr(f"Your API key is valid"), level=Qgis.MessageLevel.Success, duration=5)
+                self.iface.messageBar().pushMessage(
+                    self.tr("Success"),
+                    self.tr(f"Your API key is valid"),
+                    level=Qgis.MessageLevel.Success,
+                    duration=5,
+                )
                 self.update_layer_selection(xml_file)
             # Show error message
             else:
-                self.iface.messageBar().pushMessage(self.tr("Error"), self.tr(f"An error occurred with your API key"), level=Qgis.MessageLevel.Critical, duration=5)
-                QgsMessageLog.logMessage(f"An error occurred with your API key", level=Qgis.MessageLevel.Critical)
+                self.iface.messageBar().pushMessage(
+                    self.tr("Error"),
+                    self.tr(f"An error occurred with your API key"),
+                    level=Qgis.MessageLevel.Critical,
+                    duration=5,
+                )
+                QgsMessageLog.logMessage(
+                    f"An error occurred with your API key",
+                    level=Qgis.MessageLevel.Critical,
+                )
         except Exception as e:
-            self.iface.messageBar().pushMessage(self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5)
+            self.iface.messageBar().pushMessage(
+                self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5
+            )
             QgsMessageLog.logMessage(str(e), level=Qgis.MessageLevel.Critical)
             return
-
 
     def start_geocredit_listener(self):
         """
@@ -575,7 +652,7 @@ class NimboEarth:
         # If already connected, do nothing
         if self._gc_listener_connected:
             return
-        
+
         # Try to connect to the geocredit listener (see _on_reply_finished)
         try:
             nam = QgsNetworkAccessManager.instance()
@@ -583,9 +660,13 @@ class NimboEarth:
             self._gc_listener_connected = True
         # If it fails, do nothing and show an error
         except Exception as e:
-            self.iface.messageBar().pushMessage(self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5)
-            QgsMessageLog.logMessage(f"[Nimbo] Failed to start geocredit listener: {e}", level=Qgis.MessageLevel.Critical)
-
+            self.iface.messageBar().pushMessage(
+                self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5
+            )
+            QgsMessageLog.logMessage(
+                f"[Nimbo] Failed to start geocredit listener: {e}",
+                level=Qgis.MessageLevel.Critical,
+            )
 
     def stop_geocredit_listener(self):
         """
@@ -594,7 +675,7 @@ class NimboEarth:
         # If not connected, do nothing
         if not self._gc_listener_connected:
             return
-        
+
         # Try to disconnect from the geocredit listener (see _on_reply_finished)
         try:
             nam = QgsNetworkAccessManager.instance()
@@ -602,9 +683,13 @@ class NimboEarth:
             self._gc_listener_connected = False
         # If it fails, do nothing and show an error
         except Exception as e:
-            self.iface.messageBar().pushMessage(self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5)
-            QgsMessageLog.logMessage(f"[Nimbo] Failed to stop geocredit listener: {e}", level=Qgis.MessageLevel.Critical)
-
+            self.iface.messageBar().pushMessage(
+                self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5
+            )
+            QgsMessageLog.logMessage(
+                f"[Nimbo] Failed to stop geocredit listener: {e}",
+                level=Qgis.MessageLevel.Critical,
+            )
 
     def _on_reply_finished(self, reply):
         """
@@ -622,14 +707,21 @@ class NimboEarth:
             if not hasattr(reply, "rawHeader"):
                 return
             # Register the new value of geocredits
-            raw_val = reply.rawHeader(b'X-Kermap-Available-Credits')
+            raw_val = reply.rawHeader(b"X-Kermap-Available-Credits")
 
             # Parse the new value into an int
             try:
                 new_val = int(bytes(raw_val).decode("utf-8").strip())
             except Exception as e:
-                self.iface.messageBar().pushMessage(self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5)
-                QgsMessageLog.logMessage(f"Error to parse geocredits: {e}", level=Qgis.MessageLevel.Critical)
+                self.iface.messageBar().pushMessage(
+                    self.tr("Error"),
+                    str(e),
+                    level=Qgis.MessageLevel.Critical,
+                    duration=5,
+                )
+                QgsMessageLog.logMessage(
+                    f"Error to parse geocredits: {e}", level=Qgis.MessageLevel.Critical
+                )
                 return
 
             # If the new value is lower than the last one or if there is no last value, update the label
@@ -641,9 +733,13 @@ class NimboEarth:
                 self.update_geocredits_label(new_val)
         # If it fails, do nothing
         except Exception as e:
-            self.iface.messageBar().pushMessage(self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5)
-            QgsMessageLog.logMessage(f"[Nimbo] Error in _on_reply_finished: {e}", level=Qgis.MessageLevel.Critical)
-
+            self.iface.messageBar().pushMessage(
+                self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5
+            )
+            QgsMessageLog.logMessage(
+                f"[Nimbo] Error in _on_reply_finished: {e}",
+                level=Qgis.MessageLevel.Critical,
+            )
 
     def update_geocredits_label(self, geocredit_int):
         """
@@ -652,11 +748,11 @@ class NimboEarth:
         # Update last geocredits
         self.last_geocredits = geocredit_int
 
-        # Prepare geocredits text and color, if geocredits are more than 1000, show K 
+        # Prepare geocredits text and color, if geocredits are more than 1000, show K
         if geocredit_int >= 1000:
-            label = f"{round(geocredit_int/1000, 2)}K"
+            label = f"{round(geocredit_int / 1000, 2)}K"
             color = "#00b400"
-        else: 
+        else:
             label = str(geocredit_int)
             color = "red"
 
@@ -667,7 +763,6 @@ class NimboEarth:
         self.dockwidget.geocredit_label.setText(label)
         self.dockwidget.remaining_label.setVisible(True)
 
-   
     def update_layer_selection(self, xml_file):
         """
         Update layer selection with the list of available layers
@@ -684,7 +779,6 @@ class NimboEarth:
         self.dockwidget.tabWidget_Main.setTabEnabled(1, True)
         self.dockwidget.tabWidget_Main.setCurrentWidget(self.dockwidget.Layers_tab)
 
-
     def populating_cbboxes_and_listwidget(self):
         """
         Populating the combo boxes and the list widget
@@ -694,7 +788,6 @@ class NimboEarth:
         self._populate_month_combox()
         self._populate_layer_list()
 
-
     def _populate_composition_combox(self):
         """
         Populating the composition combo box
@@ -702,19 +795,22 @@ class NimboEarth:
         # Try to get the list of compositions
         try:
             # Get the list of compositions from the user subscription
-            compositions = self.services.get_compositions_mapping(self.user.subscription_type).values()
+            compositions = self.services.get_compositions_mapping(
+                self.user.subscription_type
+            ).values()
         except Exception as e:
-            self.iface.messageBar().pushMessage(self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5)
+            self.iface.messageBar().pushMessage(
+                self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5
+            )
             QgsMessageLog.logMessage(str(e), level=Qgis.MessageLevel.Critical)
             return
-        
+
         # Clear and populate the combo box
         self.dockwidget.composition_comBox.clear()
         self.dockwidget.composition_comBox.addItem("All")
         self.dockwidget.composition_comBox.setCurrentText("All")
         for composition in compositions:
             self.dockwidget.composition_comBox.addItem(composition)
-            
 
     def _populate_year_combox(self):
         """
@@ -729,12 +825,13 @@ class NimboEarth:
             years = self.services.get_years()
             sorted_years = sorted(years)
         except Exception as e:
-            self.iface.messageBar().pushMessage(self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5)
+            self.iface.messageBar().pushMessage(
+                self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5
+            )
             QgsMessageLog.logMessage(str(e), level=Qgis.MessageLevel.Critical)
             return
         for year in sorted_years:
             self.dockwidget.year_comBox.addItem(str(year))
-
 
     def _populate_month_combox(self):
         """
@@ -747,8 +844,9 @@ class NimboEarth:
 
         # Populate the combobox
         for month in range(12):
-            self.dockwidget.month_comBox.addItem(self.services.get_month_name(month + 1))
-
+            self.dockwidget.month_comBox.addItem(
+                self.services.get_month_name(month + 1)
+            )
 
     def _populate_layer_list(self):
         """
@@ -756,22 +854,28 @@ class NimboEarth:
         """
         # Clear the list widget
         self.dockwidget.layer_listWidget.clear()
-        
+
         # Try to get the list of allowed layers
         try:
             # Get the list of allowed layers
-            href_allowed = self.services.get_href_compositions_from_subscription_type(self.user.subscription_type)
+            href_allowed = self.services.get_href_compositions_from_subscription_type(
+                self.user.subscription_type
+            )
         except Exception as e:
-            self.iface.messageBar().pushMessage(self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5)
+            self.iface.messageBar().pushMessage(
+                self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5
+            )
             QgsMessageLog.logMessage(str(e), level=Qgis.MessageLevel.Critical)
             return
 
         # Try to get the list of compositions
         try:
             # Get the list of compositions from the user subscription
-            compositions_map = self.services.get_compositions_mapping('ALL')
+            compositions_map = self.services.get_compositions_mapping("ALL")
         except Exception as e:
-            self.iface.messageBar().pushMessage(self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5)
+            self.iface.messageBar().pushMessage(
+                self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5
+            )
             QgsMessageLog.logMessage(str(e), level=Qgis.MessageLevel.Critical)
             return
 
@@ -783,16 +887,23 @@ class NimboEarth:
 
         # Populate the list widget
         for layer in self.tile_maps.layers:
-
             if self.checks.isValidLayer(layer.href, href_allowed):
                 # Check if the layer is a watermark
-                is_watermark = 'watermark' in layer.href.lower()
+                is_watermark = "watermark" in layer.href.lower()
 
                 # Add the composition to the set of watermarked compositions
-                if is_watermark and compositions_map.get(int(layer.composition)) not in watermarked_compositions:
-                    watermarked_compositions.add(compositions_map.get(int(layer.composition)))
+                if (
+                    is_watermark
+                    and compositions_map.get(int(layer.composition))
+                    not in watermarked_compositions
+                ):
+                    watermarked_compositions.add(
+                        compositions_map.get(int(layer.composition))
+                    )
 
-                item = self._item_from_layer(is_watermark, False, layer, compositions_map)
+                item = self._item_from_layer(
+                    is_watermark, False, layer, compositions_map
+                )
 
                 # Add the item
                 self.dockwidget.layer_listWidget.addItem(item)
@@ -814,7 +925,7 @@ class NimboEarth:
                         href=None,
                         year=None,
                         month=None,
-                        composition=comp_int
+                        composition=comp_int,
                     )
 
                     # Create the item
@@ -825,7 +936,6 @@ class NimboEarth:
 
         # Sort the layer list
         self._sort_layer_list()
-
 
     def _item_from_layer(self, is_watermark, is_placeholder, layer, compositions_map):
         """
@@ -860,21 +970,32 @@ class NimboEarth:
 
         # Add a tooltip if the layer is a watermark
         if is_watermark:
-            item.setToolTip(self.tr("This layer is watermarked. Upgrade your plan to get full access."))
+            item.setToolTip(
+                self.tr(
+                    "This layer is watermarked. Upgrade your plan to get full access."
+                )
+            )
         # Add a tooltip and disable the item if the layer is a placeholder
         elif is_placeholder:
-            item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEnabled & ~Qt.ItemFlag.ItemIsSelectable)
+            item.setFlags(
+                item.flags()
+                & ~Qt.ItemFlag.ItemIsEnabled
+                & ~Qt.ItemFlag.ItemIsSelectable
+            )
             item.setToolTip(self.tr("This layer is available with PAID plans only."))
 
         # Set the data of the item to the list widget
-        item.setData(Qt.ItemDataRole.UserRole, {
-            'year': int(layer.year) if layer.year is not None else None,
-            'month': int(layer.month) if layer.month is not None else None,
-            'composition': compositions_map.get(int(layer.composition)),
-            'is_placeholder': is_placeholder,
-            'is_watermark': is_watermark,
-            'href': layer.href if not is_placeholder else None
-        })
+        item.setData(
+            Qt.ItemDataRole.UserRole,
+            {
+                "year": int(layer.year) if layer.year is not None else None,
+                "month": int(layer.month) if layer.month is not None else None,
+                "composition": compositions_map.get(int(layer.composition)),
+                "is_placeholder": is_placeholder,
+                "is_watermark": is_watermark,
+                "href": layer.href if not is_placeholder else None,
+            },
+        )
 
         return item
 
@@ -887,10 +1008,17 @@ class NimboEarth:
         # Add the items to the list with the data, text, flags and tooltip
         for i in range(self.dockwidget.layer_listWidget.count()):
             it = self.dockwidget.layer_listWidget.item(i)
-            items.append((it.data(Qt.ItemDataRole.UserRole), it.text(), it.flags(), it.toolTip()))
+            items.append(
+                (it.data(Qt.ItemDataRole.UserRole), it.text(), it.flags(), it.toolTip())
+            )
 
         # Sort the list by year desc and month desc
-        items.sort(key=lambda x: (-x[0]['year'] if x[0]['year'] is not None else 0, -x[0]['month'] if x[0]['month'] is not None else 0))
+        items.sort(
+            key=lambda x: (
+                -x[0]["year"] if x[0]["year"] is not None else 0,
+                -x[0]["month"] if x[0]["month"] is not None else 0,
+            )
+        )
 
         # Clear the list widget
         self.dockwidget.layer_listWidget.clear()
@@ -902,7 +1030,6 @@ class NimboEarth:
             if tooltip:
                 it.setToolTip(tooltip)
             self.dockwidget.layer_listWidget.addItem(it)
-
 
     def filter_layer_list(self):
         """
@@ -919,26 +1046,22 @@ class NimboEarth:
             data = item.data(Qt.ItemDataRole.UserRole)
 
             # Check if the year of the layer matches the selected year
-            year_match = (
-                selected_year == "All"
-                or str(data['year']) == selected_year
-            )
+            year_match = selected_year == "All" or str(data["year"]) == selected_year
 
             # Check if the month of the layer matches the selected month
-            month_match = (
-                selected_month == "All"
-                or (data['month'] is not None and self.services.get_month_name(data['month']) == selected_month)
+            month_match = selected_month == "All" or (
+                data["month"] is not None
+                and self.services.get_month_name(data["month"]) == selected_month
             )
-            
+
             # Check if the composition of the layer matches the selected composition
             compo_match = (
                 selected_composition == "All"
-                or data['composition'] == selected_composition
+                or data["composition"] == selected_composition
             )
 
             # Hide the layer if it doesn't match the selected year, month and composition
-            item.setHidden(not(year_match and month_match and compo_match))
-
+            item.setHidden(not (year_match and month_match and compo_match))
 
     def get_layer(self):
         """
@@ -953,13 +1076,12 @@ class NimboEarth:
         else:
             # Get the selected item
             item = self.dockwidget.layer_listWidget.currentItem()
-            
+
             # Get the data
             data = item.data(Qt.ItemDataRole.UserRole)
             # Add the layer if it has a href
-            if data['href'] is not None:
+            if data["href"] is not None:
                 self.add_layer(item)
-
 
     def add_layer(self, layer):
         """
@@ -967,25 +1089,37 @@ class NimboEarth:
         """
         # Get the layer title and href
         title_layer = layer.text()
-        href_layer = layer.data(Qt.ItemDataRole.UserRole)['href']
+        href_layer = layer.data(Qt.ItemDataRole.UserRole)["href"]
 
         # Get the layer id
-        layer_id = href_layer.split('@')[0].split('/')[-1]
+        layer_id = href_layer.split("@")[0].split("/")[-1]
 
         # Build the full href using the correct layer_id and the API key
         href_layer = f"type=xyz&url={SERVICE_URL}/{layer_id}@kermap/{{z}}/{{x}}/{{-y}}.png?kermap_token={self.user.api_key}"
-        
+
         # Prepare the layer
         paid_layer = QgsRasterLayer(href_layer, title_layer, "wms")
 
         # If the layer is valid, add it to the map
         if paid_layer.isValid():
             QgsProject().instance().addMapLayer(paid_layer)
-            self.iface.messageBar().pushMessage(self.tr("Success"), self.tr("Layer added - wait until loading is complete"), level=Qgis.MessageLevel.Success, duration=5)
+            self.iface.messageBar().pushMessage(
+                self.tr("Success"),
+                self.tr("Layer added - wait until loading is complete"),
+                level=Qgis.MessageLevel.Success,
+                duration=5,
+            )
         else:
-            self.iface.messageBar().pushMessage(self.tr("Warning"), self.tr("Invalid layer: unable to add it to the project"), level=Qgis.MessageLevel.Warning, duration=5)
-            QgsMessageLog.logMessage("Invalid layer: unable to add it to the project", level=Qgis.MessageLevel.Warning)
-
+            self.iface.messageBar().pushMessage(
+                self.tr("Warning"),
+                self.tr("Invalid layer: unable to add it to the project"),
+                level=Qgis.MessageLevel.Warning,
+                duration=5,
+            )
+            QgsMessageLog.logMessage(
+                "Invalid layer: unable to add it to the project",
+                level=Qgis.MessageLevel.Warning,
+            )
 
     def add_free_layer(self):
         """
@@ -1002,7 +1136,20 @@ class NimboEarth:
         free_layer = QgsRasterLayer(layer.href, layer.title, "wms")
         if free_layer.isValid():
             QgsProject().instance().addMapLayer(free_layer)
-            self.iface.messageBar().pushMessage(self.tr("Success"), self.tr("Layer added - wait until loading is complete"), level=Qgis.MessageLevel.Success, duration=5)
+            self.iface.messageBar().pushMessage(
+                self.tr("Success"),
+                self.tr("Layer added - wait until loading is complete"),
+                level=Qgis.MessageLevel.Success,
+                duration=5,
+            )
         else:
-            self.iface.messageBar().pushMessage(self.tr("Warning"), self.tr("Invalid layer: unable to add it to the project"), level=Qgis.MessageLevel.Warning, duration=5)
-            QgsMessageLog.logMessage("Invalid layer: unable to add it to the project", level=Qgis.MessageLevel.Warning)
+            self.iface.messageBar().pushMessage(
+                self.tr("Warning"),
+                self.tr("Invalid layer: unable to add it to the project"),
+                level=Qgis.MessageLevel.Warning,
+                duration=5,
+            )
+            QgsMessageLog.logMessage(
+                "Invalid layer: unable to add it to the project",
+                level=Qgis.MessageLevel.Warning,
+            )

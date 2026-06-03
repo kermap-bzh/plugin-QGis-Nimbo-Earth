@@ -11,7 +11,7 @@
     <message>
         <location filename="../nimbo_earth.py" line="195"/>
         <source>Nimbo&apos;s Earth Basemaps</source>
-        <translation>Nimbo's Earth Basemaps</translation>
+        <translation>Nimbo&apos;s Earth Basemaps</translation>
     </message>
     <message>
         <location filename="../nimbo_earth.py" line="394"/>
@@ -51,7 +51,7 @@
     <message>
         <location filename="../nimbo_earth.py" line="549"/>
         <source>Your API Key is not valid</source>
-        <translation>Votre clé API n'est pas valide</translation>
+        <translation>Votre clé API n&apos;est pas valide</translation>
     </message>
     <message>
         <location filename="../nimbo_earth.py" line="863"/>
@@ -66,7 +66,7 @@
     <message>
         <location filename="../nimbo_earth.py" line="1005"/>
         <source>Layer added - wait until loading is complete</source>
-        <translation>Couche ajoutée - veuillez patienter jusqu'à la fin du chargement</translation>
+        <translation>Couche ajoutée - veuillez patienter jusqu&apos;à la fin du chargement</translation>
     </message>
     <message>
         <location filename="../nimbo_earth.py" line="1007"/>
@@ -81,17 +81,17 @@
     <message>
         <location filename="../nimbo_earth.py" line="506"/>
         <source>Incorrect syntax for email</source>
-        <translation>Syntaxe incorrecte de l'email</translation>
+        <translation>Syntaxe incorrecte de l&apos;email</translation>
     </message>
     <message>
         <location filename="../nimbo_earth.py" line="563"/>
         <source>An error occurred with your API key</source>
-        <translation>Une erreur s'est produite avec la clé API</translation>
+        <translation>Une erreur s&apos;est produite avec la clé API</translation>
     </message>
     <message>
         <location filename="../nimbo_earth_dockwidget.py" line="56"/>
-        <source>Support</source>
-        <translation>Support</translation>
+        <source>Help</source>
+        <translation>Aide</translation>
     </message>
     <message>
         <location filename="../nimbo_earth.py" line="404"/>
@@ -134,7 +134,7 @@
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="236"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Create your Nimbo account to load any &lt;br/&gt;monthly basemap into QGIS, from Oct. 2019 to present.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Créer votre compte Nimbo pour charger les cartes mensuelles &lt;br&gt;souhaitées dans QGIS, d'octobre 2019 à aujourd'hui.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Créer votre compte Nimbo pour charger les cartes mensuelles &lt;br&gt;souhaitées dans QGIS, d&apos;octobre 2019 à aujourd&apos;hui.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="270"/>
@@ -229,7 +229,7 @@
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="949"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Learn more about Nimbo geocredit plans and advanced &lt;br&gt;geospatial applications: basemap integration, multispectral &lt;br&gt; basemap download or real-time monitoring.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Découvrez les offres Nimbo pour obtenir plus de géocrédits&lt;br&gt;ou bénéficier d'applications avancées : intégration de&lt;br&gt;basemaps, téléchargement de basemaps multispectrales&lt;br&gt;ou suivi en quasi temps réel.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Découvrez les offres Nimbo pour obtenir plus de géocrédits&lt;br&gt;ou bénéficier d&apos;applications avancées : intégration de&lt;br&gt;basemaps, téléchargement de basemaps multispectrales&lt;br&gt;ou suivi en quasi temps réel.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../nimbo_earth_dockwidget_base.ui" line="989"/>
