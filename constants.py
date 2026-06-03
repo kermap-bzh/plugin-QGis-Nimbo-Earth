@@ -1,38 +1,40 @@
 """
 Module containing constants
 """
-from aenum import Enum
 
+# URL to access the pricing page
+PRICING_URL = 'https://nimbo.earth/pricing'
 
-# base service URLs
+# URL to access the nimbo maps
+MAPS_URL = 'https://maps.nimbo.earth'
 
-MAX_COMPO = 5
-
+# URL to access the about page
 ABOUT_URL = 'https://nimbo.earth'
 
-SERVICE_URL = 'https://prod-data.nimbo.earth/mapcache/tms/1.0.0?kermap_token='
+# URL to prepare URL to a get a layer from the MapCache server
+SERVICE_URL = 'https://prod-data.nimbo.earth/mapcache/tms/1.0.0'
 
+# URL to get the different layers from the MapCache server
+SERVICE_TOKEN_URL = 'https://prod-data.nimbo.earth/mapcache/tms/1.0.0?kermap_token='
+
+# URL to get user features (authorized features)
+SERVICE_FEATURE_URL = 'https://prod-admin.nimbo.earth/authorized-feature'
+
+# URL to get user informations
 USER_URL = 'https://prod-admin.nimbo.earth'
 
-# base for layer name for import
-LAYER_NAME = 'Nimbo_Earth-'
+# Paid plan label to show in the UI
+PAID_PLAN_LABEL = '[PAID PLAN ONLY]'
 
-# user feature reference constants
-GEOCREDITS_REF = 'geocredits'
+# Nimbo watermark label to show in the UI
+NIMBO_WATERMARK_LABEL = '[WATERMARKED]'
 
-# enum for image composition
-class ImageComposition(Enum):
-    """Available compositions for combobox selection"""
-    _init_ = "value string"
+# Timeout for requests
+TIMEOUT = 30
 
-    NATURAL = 1, "RGB"
-    INFRARED = 2, "NIR"
-    VEGETATION = 3, "NDVI"
-    RADAR = 4, "RADAR"
-    HD = 5, "HD"
-
-    def describe(self):
-        return self.name.capitalize()
-
-    def __str__(self):
-        return self.string
+# Month names dictionary to get the month name from the month number
+MONTH_NAMES = {
+    1: "January", 2: "February", 3: "March", 4: "April",
+    5: "May", 6: "June", 7: "July", 8: "August",
+    9: "September", 10: "October", 11: "November", 12: "December"
+}

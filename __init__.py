@@ -34,8 +34,6 @@ def classFactory(iface):  # pylint: disable=invalid-name
     """
     from .services.imports import ensure_import
     ensure_import('xmltodict')
-    ensure_import('requests')
-    ensure_import('aenum')
     
     #
     from .nimbo_earth import NimboEarth

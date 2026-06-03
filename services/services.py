@@ -1,227 +1,444 @@
+import re
+
 import xmltodict
 import requests
 
 from collections import namedtuple
 from requests.structures import CaseInsensitiveDict
-from operator import attrgetter
 
 
 from ..models.models import XYZLayerModel, TileMapsModel
 from .checks import Checks
-from ..constants import USER_URL, ImageComposition, MAX_COMPO
+from ..constants import MONTH_NAMES, SERVICE_FEATURE_URL, SERVICE_TOKEN_URL, TIMEOUT, USER_URL
+from qgis.core import Qgis, QgsMessageLog
 
 
 class Services:
-    checks = Checks()
-    tile_maps = TileMapsModel()
+    """
+    Services class to manage services calls
+
+    Attributes
+    ----------
+    tile_maps : TileMapsModel
+        TileMapsModel instance
+    checks : Checks
+        Checks instance
+    _authorized_features_cache : dict
+        Dictionary to cache authorized features
+    """
+
+    def __init__(self):
+        """
+        Initialize class
+        """
+        self.tile_maps = TileMapsModel()
+        self.checks = Checks()
+        self._authorized_features_cache = {}
+
+    def get_access_token(self, email, password):
+        """
+        Get access token from email and password
+
+        Parameters
+        ----------
+        email : str
+            User email
+        password : str
+            User password
+
+        Returns
+        -------
+        str
+            Access token
+        """
+        # Check if email is valid
+        if self.checks.isValidEmail(email):
+            # Create post request
+            login_info = {
+                'username' : email,
+                'password' : password
+            }
+
+            response = requests.post(USER_URL + '/jwt-token/', json = login_info, timeout=TIMEOUT)
+        else:
+            raise Exception(f"Failed to fetch access token: email is not valid")
+
+        # If response status code is 200, get the access token
+        if response.status_code == 200:
+            return response.json()['access']
+        # If it fails, raise an exception
+        else:
+            raise Exception(f"Failed to fetch access token: {response.status_code}")
+    
+
+    def get_kermap_token(self, access_token):
+        """
+        Get kermap token from access token
+
+        Parameters
+        ----------
+        access_token : str
+            Access token
+
+        Returns
+        -------
+        str
+            Kermap token
+        """
+        # Prepare headers
+        headers = CaseInsensitiveDict()
+        headers = {'Authorization' : 'Bearer ' + access_token}
+
+        # Make request to get token
+        response = requests.get(USER_URL + '/my-token/', headers = headers, timeout=TIMEOUT)
+
+        # If the response status is 200, return the kermap token
+        if response.status_code == 200:
+            return response.json()['key']
+        # If it fails, raise an exception
+        else:
+            raise Exception(f"Failed to fetch kermap token: {response.status_code}")
+
+
+    def get_user_informations(self, kermap_token):
+        """
+        Get user informations from kermap token
+
+        Parameters
+        ----------
+        kermap_token : str
+            Kermap token
+
+        Returns
+        -------
+        dict
+            User informations
+        """
+        # Get the request URL with the API key
+        request_url = SERVICE_TOKEN_URL + kermap_token
+
+        # Prepare headers
+        headers = {'User-Agent': "QGIS Nimbo plugin"}
+
+        # Make the request to get user features
+        response = requests.get(request_url, headers = headers, timeout=TIMEOUT)
+
+        # If the response status is 200, get the user features
+        if response.status_code == 200:
+            self._authorized_features_cache.clear()
+            return response
+        # If it fails, raise an exception
+        else:
+            raise Exception(f"Failed to fetch user features: {response.status_code}")
+    
 
     def get_user_subscription_type_from_kermap_token(self, kermap_token):
         """
-        Given a Kermap Token (API key), call the backend endpoint /user-me-from-kermap-token,
-        extract user_features, and return 'PRO' or 'FREE' for the geocredits feature.
+        Get user subscription type from kermap token (API Key),
+        call the backend endpoint /user-me-from-kermap-token 
+        and extract user_features to know the subscription type
+
+        Parameters
+        ----------
+        kermap_token : str
+            Kermap token
+
+        Returns
+        -------
+        str
+            User subscription type
         """
-        from ..constants import USER_URL
+        # Get the request URL
         url = f"{USER_URL}/user-me-from-kermap-token/?kermap_token={kermap_token}"
-        try:
-            response = requests.get(url)
-            if response.status_code == 200:
-                data = response.json()
-                features = data.get('user_features', [])
-                # Find 'Nimbo GeoCredits' feature and return its feature_account
-                for feat in features:
-                    if feat.get('feature') == 'Nimbo GeoCredits':
-                        return feat.get('feature_account', 'FREE')
-                return 'FREE'
-            else:
-                print(f"Failed to fetch user features: {response.status_code}")
-                return 'FREE'
-        except Exception as e:
-            print(f"Exception fetching user features from kermap_token: {e}")
-            return 'FREE'
 
-    def get_user_subscription_type(self, access_token):
-        """Fetches user features and returns 'FREE' or 'PRO' for the geocredits feature."""
-        from ..constants import USER_URL, GEOCREDITS_REF
-        headers = {'Authorization': 'Bearer ' + access_token}
-        url = USER_URL + '/user-feature-me/'
-        try:
-            response = requests.get(url, headers=headers)
-            if response.status_code == 200:
-                features = response.json()
-                return self.get_geocredits_feature_type_from_features(features)
-            return 'FREE'  # fallback to FREE if not found or error
-        except Exception as e:
-            print(f"Error fetching user features: {e}")
-            return 'FREE'
-            
-    def get_api_key(self, email, password):
-        # making request to get the access token
-        access_token = self.get_access_token(
-            email, password)
-        if access_token is not None:
-            # making request to get the api key
-            return self.get_kermap_token(access_token)
+        # Make the request to get user features
+        response = requests.get(url, timeout=TIMEOUT)
 
-    def get_access_token(self, email, password):
-        # creating post request
-        login_info = {
-            'username': email,
-            'password': password
-        }
-        # user login
-        if self.checks.isValidEmail(email):
-            res = requests.post(USER_URL+'/jwt-token/', json=login_info)
-
-            # get access token from response
-            if res.status_code == 200:
-                access_token = res.json()['access']
-            else:
-                access_token = None
-
+        # If the response status is 200, get the user features
+        if response.status_code == 200:
+            data = response.json()
+            features = data.get('user_features', [])
+            # Find 'Nimbo GeoCredits' feature and return its feature_account
+            for feat in features:
+                if feat.get('feature') == 'Nimbo GeoCredits':
+                    return feat.get('feature_account', 'FREE')
+            raise Exception(f"Nimbo GeoCredits feature not found in user features")
+        # If it fails, raise an exception
         else:
-            access_token = None
-
-        return access_token
-
-    def get_kermap_token(self, access_token):
-        # preparing headers
-        headers = CaseInsensitiveDict()
-        headers = {'Authorization': 'Bearer ' + access_token}
-
-        # making request to get token
-        res = requests.get(USER_URL+'/my-token/', headers=headers)
-
-        # get kermap token from access token
-        kermap_token = res.json()['key']
-        return kermap_token
+            raise Exception(f"Failed to fetch user subscription type: {response.status_code}")
 
 
-    def get_tile_maps(self, xml_file, subscription_type=None):
-        # clearing the tile_maps_list
+    def get_tile_maps(self, xml_file):
+        """
+        Get tile maps from xml file and subscription type
+
+        Parameters
+        ----------
+        xml_file : str
+            Xml file
+
+        Returns
+        -------
+        list
+            List of tile maps
+        """
+        # Create a set to store hrefs to avoid duplicates
+        hrefs = set()
+
+        # Clear the tile_maps_list
         self.tile_maps.layers.clear()
-        # turning the xml to dict
+        # Turn the xml to dict
         tms_dict = xmltodict.parse(xml_file)
 
-        # getting a list of dictionnaries containing the urls for nimbo services
+        # Get a list of dictionnaries containing the urls for nimbo services
         tms_list = tms_dict['TileMapService']['TileMaps']['TileMap']
 
-        # creating the tile maps list of XYZLayer
+        # Create the tile maps list of XYZLayer
         layer_record = namedtuple('LayerRecord', 'title srs profile href')
+
+        # Get the list of authorized tile maps
+        href_accepted = self.get_href_compositions_from_subscription_type('ALL')
+
+        # Create the tile maps list
         for layer in tms_list:
-            # suppression the @ character from the key
-            new_layer = {k.replace(u'@', ''): v for k, v in layer.items()}
-            # creating the record from the layer dict
-            rec = layer_record(**new_layer)
-            
-            # filtering for FREE/PRO
-            if subscription_type == 'FREE':
-                # getting the year, month and composition of the layer
-                # print(rec.href.split('/'))
-                data = rec.href.split('/')[6].split('@')[0].split('_')
-                # Only allow watermark services for FREE
-                # Only process if tileset is in expected format: watermark_YEAR_MONTH_COMPO
-                # print("DEBUG: Processing data: data={data}")
-                if len(data) == 4 and data[0].lower() == 'watermark':
-                    year, month, compo = data[1], data[2], data[3]
-                    # Do NOT zero-pad month for FREE users
-                    month = str(int(month)) if month.isdigit() else month
-                    # print('month ==>',month)
-                    # print("DEBUG: Adding layer: year={year}, month={month}, composition={compo}")
-                    self.tile_maps.layers.append(XYZLayerModel(
-                        rec.title, rec.srs, rec.profile, rec.href, year=year, month=month, composition=compo))
-                    self.tile_maps.layers.sort(key=lambda x: (int(x.year), int(x.month)))
-            elif subscription_type == 'PRO' or subscription_type == 'PRO HD':
-                # print("dans le else a la génération")
-                # getting the year, month and composition of the layer
-                data = rec.href.split('/')[6].split('@')[0].split('_')
-                # PRO or default: all layers except water/rasterdem/copernicus/SR
-                if ('water' not in data) and ('rasterdem' not in data) and ('copernicus' not in data) and ('demo' not in data) and (int(data[2]) <= MAX_COMPO):
-                    # For PRO, do not zero-pad month, always use int
-                    month = str(int(data[1])) if data[1].isdigit() else data[1]
-                    self.tile_maps.layers.append(XYZLayerModel(
-                        rec.title, rec.srs, rec.profile, rec.href, year=data[0], month=month, composition=data[2]))
-                    self.tile_maps.layers.sort(key=lambda x: (int(x.year), int(x.month)))
+            href = layer.get('@href')
+            # Check if the href is already in the set
+            if href in hrefs:
+                QgsMessageLog.logMessage(f"Duplicate href {href} found in tile maps", level=Qgis.MessageLevel.Warning)
+                continue
+            hrefs.add(href)
+
+            # Check if the href layer is valid compared with the authorized hrefs
+            if self.checks.isValidLayer(href, href_accepted):
+                # Create the record from the layer dict
+                rec = layer_record(
+                    title=layer.get('@title'),
+                    srs=layer.get('@srs'),
+                    profile=layer.get('@profile'),
+                    href=href
+                )
+                
+                # Get the raw id
+                raw_id = href.split('/tms/1.0.0/')[-1].split('@')[0]
+                
+                # Remove the prefix from the raw id to keep only the tile map id
+                # r'^[a-zA-Z_]*?(\d)' for the part before the first number and r'\1' for the beginning of the number
+                raw_id = re.sub(r'^[a-zA-Z_]*?(\d)', r'\1', raw_id)
+                
+                # Add the tile map
+                self._add_tile_map(rec, raw_id)
+
+        # Sort the tile maps list
+        self.tile_maps.layers.sort(key=lambda x: (
+            int(x.year) if str(x.year).isdigit() else 0,
+            int(x.month) if str(x.month).isdigit() else 0
+        ))
 
         return self.tile_maps
+    
+
+    def _add_tile_map(self, rec, raw_id):
+        """
+        Add tile map to tile maps list with the raw id and the layer record
+
+        Parameters
+        ----------
+        rec : LayerRecord
+            Layer record
+        raw_id : str
+            Raw id
+        """
+        # Split the raw id
+        data = raw_id.split('_')
+
+        # Check if the layer is normal and add it
+        if len(data) >= 3 and data[-3].isdigit() and data[-2].isdigit() and data[-1].isdigit():
+            layer = XYZLayerModel(
+                title=rec.title,
+                srs=rec.srs,
+                profile=rec.profile,
+                href=rec.href,
+                year=data[-3],
+                month=data[-2],
+                composition=data[-1]
+            )
+            self.tile_maps.layers.append(layer)
+        else:
+            layer = XYZLayerModel(
+                title=rec.title,
+                srs=rec.srs,
+                profile=rec.profile,
+                href=rec.href,
+                year=None,
+                month=None,
+                composition=data[-1]
+            )
+            self.tile_maps.layers.append(layer)
+
 
     def get_month_name(self, month):
-        if month == "01" or month == "1":
-            return "January"
-        elif month == "02" or month == "2":
-            return"February"
-        elif month == "03" or month == "3":
-            return "March"
-        elif month == "04" or month == "4":
-            return "April"
-        elif month == "05" or month == "5":
-            return "May"
-        elif month == "06" or month == "6":
-            return "June"
-        elif month == "07" or month == "7":
-            return "July"
-        elif month == "08" or month == "8":
-            return "August"
-        elif month == "09" or month == "9":
-            return "September"
-        elif month == "10":
-            return "October"
-        elif month == "11":
-            return "November"
-        elif month == "12":
-            return "December"
+        """
+        Get month name from month number
 
-    def get_composition_name(self, composition):
-        if composition == "1":
-            return ImageComposition.NATURAL.__str__()
-        elif composition == "2":
-            return ImageComposition.INFRARED.__str__()
-        elif composition == "3":
-            return ImageComposition.VEGETATION.__str__()
-        elif composition == "4":
-            return ImageComposition.RADAR.__str__()
-        elif composition == "5":
-            return ImageComposition.HD.__str__()
+        Parameters
+        ----------
+        month : str
+            Month number
 
-    def get_min_year(self, tile_maps):
-        years = self.get_years(tile_maps)
-        return min(years)
+        Returns
+        -------
+        str
+            Month name
+        """
+        return MONTH_NAMES.get(int(month), '')
 
-    def get_max_year(self, tile_maps):
-        years = self.get_years(tile_maps)
-        return max(years)
 
-    def get_years(self, tile_maps):
+    def get_years(self):
+        """
+        Get years
+
+        Returns
+        -------
+        list
+            List of years
+        """
         years = set()
-        for layer in tile_maps.layers:
+        # Get the years from the layers
+        for layer in self.tile_maps.layers:
+            if layer.year is None:
+                continue
             years.add(int(layer.year))
         return list(years)
 
-    def get_composition_from_layers(self, tile_maps):
-        compositions = set()
-        for layer in tile_maps.layers:
-            compositions.add(int(layer.composition))
-        return list(compositions)
 
-    def get_month_for_this_year(self, year, tile_maps):
-        months = set()
-        for layer in tile_maps.layers:
-            if layer.year == year:
-                months.add(int(layer.month))
-        return list(months)
+    def _get_authorized_features(self, subscription_type):
+        """
+        Get authorized features from subscription type
 
-    def filtering_layers(self, data):
-        # print(f"DEBUG: filtering_layers called, data={data}")  # Debug log
+        Parameters
+        ----------
+        subscription_type : str
+            Subscription type
+
+        Returns
+        -------
+        list
+            List of authorized features
+        """
+        # If subscription type is None, raise an exception
+        if subscription_type is None:
+            raise Exception(f"Failed to fetch authorized features: subscription type is None")
+        
+        # Get all features
+        elif subscription_type == 'ALL':
+            request_url = f"{SERVICE_FEATURE_URL}"
+        # Get features from subscription type
+        else:
+            request_url = f"{SERVICE_FEATURE_URL}/?feature_account={subscription_type.upper()}"
+
+        response = requests.get(request_url, timeout=TIMEOUT)
+        # If the response status is 200, return the authorized features
+        if response.status_code == 200:
+            data = response.json()
+            return data
+        else:
+            raise Exception(f"Failed to fetch authorized features: {response.status_code}")
+
+
+    def get_href_compositions_from_subscription_type(self, subscription_type):
+        """
+        Get compositions from subscription type
+
+        Parameters
+        ----------
+        subscription_type : str
+            Subscription type
+
+        Returns
+        -------
+        list
+            List of compositions
+        """
+        # Get authorized features
+        if subscription_type in self._authorized_features_cache:
+            data = self._authorized_features_cache[subscription_type]
+        else:
+            self._authorized_features_cache[subscription_type] = self._get_authorized_features(subscription_type)
+            data = self._authorized_features_cache[subscription_type]
+
+        # If data is None, raise an exception
+        if data is None:
+            raise Exception(f"Failed to fetch authorized features: data is None")
+        
+        # Get the list of compositions
+        compositions_list = []
+        # If subscription type is ALL, get the list of compositions from all features
+        if subscription_type == 'ALL':
+            for feature in data:
+                for composition in feature.get('service_included'):
+                    if composition.get('request') not in compositions_list:
+                        compositions_list.append(composition.get('request'))
+            return compositions_list
+        # If subscription type is not ALL, get the list of compositions from the subscription type
+        else:
+            for composition in data[0].get('service_included'):
+                compositions_list.append(composition.get('request'))
+            return compositions_list
+
+    def get_compositions_mapping(self, subscription_type):
+        """
+        Get compositions name from subscription type
+
+        Parameters
+        ----------
+        subscription_type : str
+            Subscription type
+
+        Returns
+        -------
+        list
+            List of compositions name
+        """
+        # Get authorized features
+        if 'ALL' in self._authorized_features_cache:
+            data = self._authorized_features_cache['ALL']
+        else:
+            self._authorized_features_cache['ALL'] = self._get_authorized_features('ALL')
+            data = self._authorized_features_cache['ALL']
+
+        # If data is None, raise an exception
+        if data is None:
+            raise Exception(f"Failed to fetch authorized features: data is invalid")
+
+        # Build name mapping for ALL
+        api_mapping = {}
+        for feature in data:
+            for service in feature.get('service_included', []):
+                request = service.get('request', '')
+                # Get the composition number with _<number>@
+                match = re.search(r'_(\d+)@', request)
+                if match:
+                    # Get the composition number
+                    comp_int = int(match.group(1))
+                    # Get the full composition name like "RGB" or "NIR_RED"
+                    name = service.get('service', '').split('_', 1)[-1].replace('_', ' ')
+                    if comp_int not in api_mapping and 'WATERMARK' not in name.upper():
+                        api_mapping[comp_int] = name
+
+        # Get hrefs the user has access to
+        href_allowed = self.get_href_compositions_from_subscription_type(subscription_type)
+
+        # If href_allowed is None, raise an exception
+        if href_allowed is None:
+            raise Exception(f"Failed to fetch authorized features: href_allowed is invalid")
+
+        # Build name mapping for the user subscription
+        comp_mapping = {}
         for layer in self.tile_maps.layers:
-            # print('=========================')
-            # print(f"DEBUG: Comparing layer: month_name={self.get_month_name(layer.month)}, year={layer.year}, composition_name={self.get_composition_name(layer.composition)}")
-            # print(f"DEBUG: Against data: month={data[0]}, year={data[1]}, composition={data[2]}")
-            # print(f"DEBUG: layer={layer}")  # Debug log
-            # print('=========================')
-            # checking which layer possess this year, month and composition
-            if  self.get_month_name(layer.month) == data[0]\
-                and layer.year == data[1] \
-                    and self.get_composition_name(layer.composition) == data[2]:
-                return layer
+            comp_int = int(layer.composition)
+            if comp_int not in comp_mapping:
+                if self.checks.isValidLayer(layer.href, href_allowed):
+                    if comp_int in api_mapping:
+                        comp_mapping[comp_int] = api_mapping[comp_int]
 
-
-
+        return comp_mapping
