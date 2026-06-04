@@ -3,9 +3,6 @@
 # NimboEarth documentation build configuration file, created by
 # sphinx-quickstart on Sun Feb 12 17:11:03 2012.
 
-import sys
-import os
-
 # -- General configuration -----------------------------------------------------
 
 # Core Sphinx extensions
