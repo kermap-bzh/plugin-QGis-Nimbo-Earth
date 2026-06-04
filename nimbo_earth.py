@@ -22,38 +22,38 @@
  ***************************************************************************/
 """
 
+import os.path
 import webbrowser
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt, QUrl
-from qgis.PyQt.QtGui import QIcon, QPixmap, QDesktopServices, QCursor
-from qgis.PyQt.QtWidgets import QAction, QLineEdit, QListWidgetItem
+
 from qgis.core import (
     Qgis,
-    QgsRasterLayer,
-    QgsProject,
-    QgsNetworkAccessManager,
     QgsMessageLog,
+    QgsNetworkAccessManager,
+    QgsProject,
+    QgsRasterLayer,
 )
-
+from qgis.PyQt.QtCore import QCoreApplication, QSettings, Qt, QTranslator, QUrl
+from qgis.PyQt.QtGui import QCursor, QDesktopServices, QIcon, QPixmap
+from qgis.PyQt.QtWidgets import QAction, QLineEdit, QListWidgetItem
 
 from .constants import (
     ABOUT_URL,
+    MAPS_URL,
     NIMBO_WATERMARK_LABEL,
     PAID_PLAN_LABEL,
-    SERVICE_URL,
-    MAPS_URL,
     PRICING_URL,
+    SERVICE_URL,
 )
 from .models.models import NimboUser, XYZLayerModel
-from .services.checks import Checks
-from .services.services import Services
-from .style.style import get_style
-
-# Initialize Qt resources from file resources.py
-from .resources import *
 
 # Import the code for the DockWidget
 from .nimbo_earth_dockwidget import NimboEarthDockWidget
-import os.path
+
+# Initialize Qt resources from file resources.py
+from .resources import *  # noqa: F403
+from .services.checks import Checks
+from .services.services import Services
+from .style.style import get_style
 
 
 class NimboEarth:
@@ -271,7 +271,7 @@ class NimboEarth:
         for signal, method in self._get_signals():
             try:
                 signal.disconnect(method)
-            except:
+            except TypeError:
                 pass
 
     def _connect_all_signals(self):
@@ -376,7 +376,7 @@ class NimboEarth:
             # Dockwidget may not exist if:
             #    first run of plugin
             #    removed on close (see self.onClosePlugin method)
-            if self.dockwidget == None:
+            if self.dockwidget is None:
                 # Create the dockwidget (after translation) and keep reference
                 self.dockwidget = NimboEarthDockWidget()
                 get_style(self.dockwidget)
@@ -537,7 +537,7 @@ class NimboEarth:
             if "401" in str(e):
                 self.iface.messageBar().pushMessage(
                     self.tr("Error"),
-                    self.tr(f"Incorrect email or password"),
+                    self.tr("Incorrect email or password"),
                     level=Qgis.MessageLevel.Critical,
                     duration=5,
                 )
@@ -545,7 +545,7 @@ class NimboEarth:
             elif "email is not valid" in str(e):
                 self.iface.messageBar().pushMessage(
                     self.tr("Error"),
-                    self.tr(f"Incorrect syntax for email"),
+                    self.tr("Incorrect syntax for email"),
                     level=Qgis.MessageLevel.Critical,
                     duration=5,
                 )
@@ -598,12 +598,12 @@ class NimboEarth:
             if response is None:
                 self.iface.messageBar().pushMessage(
                     self.tr("Error"),
-                    self.tr(f"Your API Key is not valid"),
+                    self.tr("Your API Key is not valid"),
                     level=Qgis.MessageLevel.Critical,
                     duration=5,
                 )
                 QgsMessageLog.logMessage(
-                    f"Your API Key is not valid", level=Qgis.MessageLevel.Critical
+                    "Your API Key is not valid", level=Qgis.MessageLevel.Critical
                 )
                 return
             # Update the layer selection with the list of urls availables and geocredits
@@ -621,7 +621,7 @@ class NimboEarth:
                 xml_file = response.content
                 self.iface.messageBar().pushMessage(
                     self.tr("Success"),
-                    self.tr(f"Your API key is valid"),
+                    self.tr("Your API key is valid"),
                     level=Qgis.MessageLevel.Success,
                     duration=5,
                 )
@@ -630,12 +630,12 @@ class NimboEarth:
             else:
                 self.iface.messageBar().pushMessage(
                     self.tr("Error"),
-                    self.tr(f"An error occurred with your API key"),
+                    self.tr("An error occurred with your API key"),
                     level=Qgis.MessageLevel.Critical,
                     duration=5,
                 )
                 QgsMessageLog.logMessage(
-                    f"An error occurred with your API key",
+                    "An error occurred with your API key",
                     level=Qgis.MessageLevel.Critical,
                 )
         except Exception as e:
@@ -1067,9 +1067,6 @@ class NimboEarth:
         """
         Get the selected layer
         """
-        # Re-initialize the layer
-        layer = XYZLayerModel()
-
         # If no layer is selected, do nothing
         if len(self.dockwidget.layer_listWidget.selectedItems()) == 0:
             return

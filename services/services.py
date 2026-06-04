@@ -66,7 +66,7 @@ class Services:
                 USER_URL + "/jwt-token/", json=login_info, timeout=TIMEOUT
             )
         else:
-            raise Exception(f"Failed to fetch access token: email is not valid")
+            raise Exception("Failed to fetch access token: email is not valid")
 
         # If response status code is 200, get the access token
         if response.status_code == 200:
@@ -166,7 +166,7 @@ class Services:
             for feat in features:
                 if feat.get("feature") == "Nimbo GeoCredits":
                     return feat.get("feature_account", "FREE")
-            raise Exception(f"Nimbo GeoCredits feature not found in user features")
+            raise Exception("Nimbo GeoCredits feature not found in user features")
         # If it fails, raise an exception
         else:
             raise Exception(
@@ -339,7 +339,7 @@ class Services:
         # If subscription type is None, raise an exception
         if subscription_type is None:
             raise Exception(
-                f"Failed to fetch authorized features: subscription type is None"
+                "Failed to fetch authorized features: subscription type is None"
             )
 
         # Get all features
@@ -386,7 +386,7 @@ class Services:
 
         # If data is None, raise an exception
         if data is None:
-            raise Exception(f"Failed to fetch authorized features: data is None")
+            raise Exception("Failed to fetch authorized features: data is None")
 
         # Get the list of compositions
         compositions_list = []
@@ -428,7 +428,7 @@ class Services:
 
         # If data is None, raise an exception
         if data is None:
-            raise Exception(f"Failed to fetch authorized features: data is invalid")
+            raise Exception("Failed to fetch authorized features: data is invalid")
 
         # Build name mapping for ALL
         api_mapping = {}
@@ -455,7 +455,7 @@ class Services:
         # If href_allowed is None, raise an exception
         if href_allowed is None:
             raise Exception(
-                f"Failed to fetch authorized features: href_allowed is invalid"
+                "Failed to fetch authorized features: href_allowed is invalid"
             )
 
         # Build name mapping for the user subscription

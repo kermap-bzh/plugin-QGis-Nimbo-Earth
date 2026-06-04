@@ -7,11 +7,10 @@
 
 import sys
 import getpass
-import xmlrpc.client
-from argparse import ArgumentParser
+import xmlrpc.client # nosec: B411
+from optparse import OptionParser
 
-import defusedxml.xmlrpc
-defusedxml.xmlrpc.monkey_patch()
+standard_library.install_aliases()
 
 # Configuration
 PROTOCOL = 'https'
@@ -74,32 +73,24 @@ def hide_password(url, start=6):
 
 
 if __name__ == "__main__":
-    # Remplacement de optparse par argparse (standard moderne de Python)
-    parser = ArgumentParser(description="Upload a plugin package to the plugin repository.")
-    parser.add_argument(
+    parser = OptionParser(usage="%prog [options] plugin.zip")
+    parser.add_option(
         "-w", "--password", dest="password",
         help="Password for plugin site", metavar="******")
-    parser.add_argument(
+    parser.add_option(
         "-u", "--username", dest="username",
         help="Username of plugin site", metavar="user")
-    parser.add_argument(
+    parser.add_option(
         "-p", "--port", dest="port",
         help="Server port to connect to", metavar="80")
-    parser.add_argument(
+    parser.add_option(
         "-s", "--server", dest="server",
         help="Specify server name", metavar="plugins.qgis.org")
-    parser.add_argument(
-        "plugin_zip", nargs="*", help="Path to the plugin ZIP file"
-    )
-    
-    options = parser.parse_args()
-    args = options.plugin_zip
-
+    options, args = parser.parse_args()
     if len(args) != 1:
         print("Please specify zip file.\n")
         parser.print_help()
         sys.exit(1)
-        
     if not options.server:
         options.server = SERVER
     if not options.port:
@@ -117,5 +108,4 @@ if __name__ == "__main__":
     if not options.password:
         # interactive mode
         options.password = getpass.getpass()
-        
     main(options, args)

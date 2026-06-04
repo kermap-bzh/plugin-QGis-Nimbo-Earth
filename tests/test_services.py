@@ -15,10 +15,10 @@ These tests cover :
 - get_compositions_mapping
 """
 
+import importlib.util
 import os
 import sys
 import unittest
-import importlib.util
 from collections import namedtuple
 from unittest.mock import MagicMock, patch
 
@@ -33,7 +33,7 @@ if _services_dir not in sys.path:
 if _plugin_dir not in sys.path:
     sys.path.insert(0, _plugin_dir)
 
-from imports import ensure_import  # services/imports.py
+from imports import ensure_import  # noqa: E402
 
 ensure_import("xmltodict")
 ensure_import("requests")
@@ -565,7 +565,7 @@ class TestGetTileMaps(unittest.TestCase):
         Test with a valid xml with hrefs duplication
         """
         result = self.svc.get_tile_maps(SAMPLE_XML)
-        hrefs = [l.href for l in result.layers]
+        hrefs = [layer.href for layer in result.layers]
         self.assertEqual(len(hrefs), len(set(hrefs)))
 
     def test_sort(self):
@@ -573,7 +573,7 @@ class TestGetTileMaps(unittest.TestCase):
         Test with a valid xml and sort
         """
         result = self.svc.get_tile_maps(SAMPLE_XML)
-        pairs = [(l.year, l.month) for l in result.layers]
+        pairs = [(layer.year, layer.month) for layer in result.layers]
         self.assertEqual(pairs, sorted(pairs))
 
     def test_year_month_composition(self):
@@ -581,7 +581,7 @@ class TestGetTileMaps(unittest.TestCase):
         Test a layer with a valid xml
         """
         result = self.svc.get_tile_maps(SAMPLE_XML)
-        layer = next(l for l in result.layers if l.composition == "1")
+        layer = next(layer for layer in result.layers if layer.composition == "1")
         self.assertEqual(layer.year, "2023")
         self.assertEqual(layer.month, "06")
 
