@@ -24,7 +24,6 @@
 """
 
 
-    
 # noinspection PyPep8Naming
 def classFactory(iface):  # pylint: disable=invalid-name
     """Load NimboEarth class from file NimboEarth.
@@ -33,10 +32,9 @@ def classFactory(iface):  # pylint: disable=invalid-name
     :type iface: QgsInterface
     """
     from .services.imports import ensure_import
-    ensure_import('xmltodict')
-    ensure_import('requests')
-    ensure_import('aenum')
-    
-    #
+
+    ensure_import("xmltodict")
+
     from .nimbo_earth import NimboEarth
+
     return NimboEarth(iface)

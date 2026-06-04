@@ -23,8 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 /*-----QWidget-----*/
 QWidget
 {
-	background-color: #20242d; 
+	background-color: #121111; 
 	color: #fff;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
 }
 
@@ -33,107 +34,279 @@ QWidget
 QLabel 
 {
 	color: white    ;
-	background-color: #20242d;
+	background-color: #121111;
     margin-top:1px;
 	margin-bottom:1px;
+	font-size: 14px;
+	font-weight: 400;
+}
 
+QLabel[objectName^="or_label"] {
+	font-size: 16px;
+	font-weight: 400;
 }
 
 QLabel[objectName^="geocredit_label"] {
 	font-size: 16px;
 	font-weight: 800;
-
 }
 
-QLabel[objectName^="gc_label"] {
-	font-size: 16px;
-	font-weight: 800;
-
+QLabel[objectName^="remaining_label"] {
+	font-size: 15px;
+	font-weight: 400;
 }
+
+QLabel[objectName^="information_label"] {
+	font-size: 12px;
+	font-weight: 500;
+	background-color: #D9D9D9;
+	border-radius: 5px;
+	padding: 5px;
+	color: #000000;
+}
+
+QLabel[objectName^="QLabel_Title"] {
+	font-size: 20px;
+	font-weight: 600;
+	margin-top: 5px;
+	padding: 5px;
+	color: #FFFFFF;
+}
+
+QLabel[objectName^="compositions_label"] {
+	font-size: 14px;
+	font-weight: 500;
+	padding-left: 5px;
+	color: #FFFFFF;
+}
+
+QLabel[objectName^="months_label"] {
+	font-size: 14px;
+	font-weight: 500;
+	padding-left: 5px;
+	color: #FFFFFF;
+}
+
+QLabel[objectName^="years_label"] {
+	font-size: 14px;
+	font-weight: 500;
+	padding-left: 5px;
+	color: #FFFFFF;
+}
+
 
 /*-----QLineEdit-----*/
 QLineEdit{
 	background-color: white;
 	color: #000;
     font-weight: 400;
-
-}
-
-
-/*-----QSplitter-----*/
-QSplitter::handle 
-{
-	background-color: #282323;
-
+	font-size: 14px;
 }
 
 
 /*-----QListView-----*/
 QListView
 {
-	font: 11pt;
-	color:white;
+	font-size: 16px;
+	font-weight: 500;
+	padding: 4px;
+	margin: 4px;
+	background-color: #D9D9D9;
+	border-radius: 6px;
 	show-decoration-selected: 1;
-
+	outline: 0;
 }
 
+QListView::item
+{
+	color:black;
+	background-color: #D9D9D9;
+	border-radius: 10px;
+	margin-left : 10px;
+	margin-right : 10px;
+	margin-top: 2px;
+	margin-bottom: 2px;
+	padding: 6px;
+}
 
 QListView::item:selected
 {
-	color:black;
-	background-color:lightgray;
+	background-color: #FFFFFF;
 	border: none;
-	border-radius: 0px;
-	padding-left : 10px;
-
 }
-
 
 QListView::item:!selected
 {
-	color:white;
+	color:black;
 	background-color:transparent;
 	border: none;
-	border-radius: 0px;
-	padding-left : 10px;
-
+	border-radius: 6px;
+	margin-left : 10px;
+	margin-right : 10px;
 }
-
 
 QListView::item:!selected:hover
 {
-	color:white;
-	background-color:rgb(62, 62, 62);
+	color:black;
+	background-color: #eeeeee;
 	border: none;
-	border-radius: 0px;
-	padding-left : 10px;
+	border-radius: 10px;
+	margin-left : 10px;
+	margin-right : 10px;
+}
 
+
+/*-----QScrollBar-----*/
+QScrollBar:vertical {
+    background-color: #AFAFAF;
+    width: 16px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: #363636;
+    min-height: 30px;
+    border-radius: 6px;
+    margin: 2px 2px;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical 
+{ 
+	height: 0px; 
+}
+
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical 
+{ 
+	background: none;
 }
 
 
 /*-----QTabWidget-----*/
+QTabBar::tab {
+	padding: 6px 16px;
+	font-size: 15px;
+	font-weight: 400;
+}
+
+QTabBar::tab:selected {
+	color: #FFFFFF;
+	background-color: #535764;
+}
+
 QTabBar::tab:!selected {
-    color:gray;
+    color: #9F9F9F;
+	background-color: #2B2D35;
+}
+
+QTabBar::tab:!selected:hover {
+	color: #FFFFFF;
+	background-color: #393C45;
+}
+
+QTabWidget::pane {
+	border: 2px solid #535764;
 }
 
 
 /*-----QPushButton-----*/
 QPushButton{
-    background-color: #3d5372;
+    background-color: #3070E1;
+	border-radius: 10px;
+	color: white;
+	padding-left: 24px;
+	padding-right: 24px;
+	outline: 0;
+	font-size: 14px;
+	font-weight: 400;
 }
 
+QPushButton:hover{
+	background-color: #4d85ff;
+	border-radius: 10px;
+	color: white;
+	padding-left: 24px;
+	padding-right: 24px;
+}
+
+QPushButton[objectName^="eye_pButton"]{
+	border-radius: 4px;
+}
+
+QPushButton[objectName^="dashboard_pButton"]{
+	border-radius: 4px;
+}
+
+QPushButton[objectName^="information_pButton"]{
+	background-color: transparent;
+	border-radius: 0px;
+	padding: 0px;
+	color: transparent;
+}
 
 /*-----QGroupBox-----*/
 QGroupBox {
-    border: 2px solid gray;
-    border-radius: 5px;
+    border: 2px solid #C3C3C3;
+    border-radius: 6px;
     margin-top: 1ex;
+	font-size: 14px;
+	font-weight: 700;
 }
 
 QGroupBox::title {
     subcontrol-origin: margin;
     subcontrol-position: top center; /* position at the top center */
-    padding: 0 3px;
+    padding: 0 4px;
     
 }
+/*-----QComboBox-----*/
+QComboBox {
+    font-size: 16px;
+    font-weight: 500;
+    padding: 4px 10px;
+    margin: 4px;
+    background-color: #D9D9D9;
+    border-radius: 6px;
+    color: black;
+    border: none;
+    outline: none;
+}
 
+QComboBox::drop-down {
+    width: 30px;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    background-color: #D9D9D9;
+}
+
+QComboBox::down-arrow {
+    image: url(ASSETS_PATH/down-arrow.png);
+    width: 15px;
+    height: 15px;
+}
+
+
+QComboBox QAbstractItemView {
+    background-color: #FFFFFF;
+    outline: none;
+    padding: 4px;
+}
+
+QComboBox QAbstractItemView::item {
+    color: black;
+    outline: none;
+    padding: 6px;
+    min-height: 28px;
+}
+
+QComboBox QAbstractItemView::item:hover {
+    background-color: #EEEEEE;
+    outline: none;
+    color: black;
+}
+
+QComboBox QAbstractItemView::item:selected {
+    background-color: #D9D9D9;
+    outline: none;
+    color: black;
+}

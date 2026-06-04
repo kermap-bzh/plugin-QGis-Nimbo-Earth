@@ -3,47 +3,86 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to NimboEarth's documentation!
-============================================
-
-Contents:
-Concepts
-Running Nimbo Earth
+Welcome to Nimbo Earth Basemaps TMS Documentation!
+==================================================
 
 .. toctree::
    :maxdepth: 2
+   :caption: Contents:
 
-.. index::Concepts
 Concepts
-==================
-Nimbo Earth provide you access to Nimbo tile map services. 
-From it you can add natural, infrared, vegetation (NDVI) or radar raster layers.
+========
 
-# Open the plugin from within QGis
-# Login or use your api key
-# Select a map to add
-# Add it to your project
+Nimbo Earth Basemaps is an innovative Earth observation service providing cloud-free, homogenous mosaics of the world's entire landmass as captured by satellite imagery. Mosaics are updated every single month and served in WMS/WMTS formats.
+
+The plugin provides users with 4 distinct data layers every month:
+
+* **Natural colors (RGB)** at 10m resolution.
+* **Infrared (NIR)** at 10m resolution.
+* **NDVI (vegetation health index)** at 10m resolution.
+* **HD Natural colors (RGB)** at 2.5m resolution (AI enhanced through in-house algorithms).
+
+Data Availability Timeline
+--------------------------
+
+**For all 10m resolution layers (RGB, NIR, NDVI):**
+
+* **From October 2019 to present**: Europe, Northern Africa, and Middle East.
+* **From March 2022 to present**: All of the above + the USA.
+* **From February 2023 to present**: Full Global coverage.
+
+**For the HD Natural colors (RGB) at 2.5m:**
+
+* **From May 2025 to present**: Full Global coverage.
 
 Running Nimbo Earth
-===========================
-You can open the plugin from the icon in toolbar or from the Web menu
-When you open plugin a dockwidget appears on the right side of QGis.
-The first window you will see has text fields.
-Either you connect using your nimbo account email and password
-or you can directly paste your api key.
+===================
 
-Once your login or api key validation succeed, you will access to the second panel.
-In this panel you will choose a layer to import.
-You have two choices :
-- you can select composition, year and month from the comboboxes
-- you can directly select the layer from the list (you can only select one layer at a time)
+You can launch the plugin either by clicking its icon in the QGIS toolbar or via the **Web** menu. 
+Once opened, the **Welcome to Nimbo Earth Basemaps TMS** dock widget will appear on the right side of the QGIS interface.
 
-Remember that adding a layer will consume geocredits from your nimbo account
-you can consult your geocredits balance from your dashboard on https://maps.nimbo.earth/myNimbo/dashboard
-(if you are logged in).
+1. API Key Validation Tab
+-------------------------
 
-Indices and tables
+When you first open the plugin, you will interact with the **API key validation** tab. This interface is split into three main sections:
+
+* **Try our cloud-free basemap service**: Allows you to instantly test the service by loading a free sample layer (**June 2023 | RGB**) without requiring an account.
+* **Create your account**: If you don't have an account yet, use the **Sign up to Nimbo** or **See offers** buttons to register and access the monthly tiers.
+* **Already have a Nimbo account?**: Authenticate directly using one of two methods:
+
+  - Enter your **E-mail** and **Password** then click **Login** to securely fetch your token.
+  - Paste your personal **API key** extracted from your online dashboard, then click **Validate your key**.
+
+2. Layer Selector Tab
+---------------------
+
+Once authenticated, the **Layer selector** tab becomes active and accessible.
+
+* **Geocredits Tracking**: The top bar displays your remaining balance of **Geocredits**. 
+* **Parameters Filtering**: You can easily filter the extensive catalog of monthly basemaps using three dropdown comboboxes:
+
+  - **Compositions**: Filter by image type (All, RGB, NDVI, Infrared, etc.).
+  - **Months**: Filter by a specific month.
+  - **Years**: Filter by a specific year.
+
+* **Adding Layers**: Select a layer from the reverse-chronological list view and click the **Add layer** button to load it into your current QGIS project workspace.
+
+.. important::
+   Please note that each layer you enable (i.e., check/select) will consume credits from your balance. 
+   You can monitor your detailed data consumption from your personal online dashboard.
+
+Professional Plans
+------------------
+
+For advanced users requiring custom integrations, multispectral basemap downloads, or real-time environmental monitoring, use the **Discover offers** button under the **Professional plans** section to learn more about advanced geospatial options.
+
+Support & Links
+===============
+
+* Need assistance? Click the **Support** link in the top-right corner of the window to access our support form.
+* Learn more about our ecosystem using the **About Nimbo** and **About Kermap** links located at the bottom of the plugin window.
+
+Indices and Tables
 ==================
 
 * :ref:`search`
-

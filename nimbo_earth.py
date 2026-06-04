@@ -21,44 +21,58 @@
  *                                                                         *
  ***************************************************************************/
 """
-from email.charset import QP
-from logging import raiseExceptions
+
+import os.path
 import webbrowser
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt, QSize, QUrl
-from qgis.PyQt.QtGui import QIcon, QPixmap, QDesktopServices
+
+from qgis.core import (
+    Qgis,
+    QgsMessageLog,
+    QgsNetworkAccessManager,
+    QgsProject,
+    QgsRasterLayer,
+)
+from qgis.PyQt.QtCore import QCoreApplication, QSettings, Qt, QTranslator, QUrl
+from qgis.PyQt.QtGui import QCursor, QDesktopServices, QIcon, QPixmap
 from qgis.PyQt.QtWidgets import QAction, QLineEdit, QListWidgetItem
-from qgis.core import QgsRasterLayer, QgsProject, QgsNetworkAccessManager
-from qgis.utils import showPluginHelp
-from qgis.PyQt.QtNetwork import QNetworkReply
-from qgis.PyQt.QtCore import QTimer
 
-
-from .constants import ABOUT_URL, SERVICE_URL, ImageComposition
+from .constants import (
+    ABOUT_URL,
+    MAPS_URL,
+    NIMBO_WATERMARK_LABEL,
+    PAID_PLAN_LABEL,
+    PRICING_URL,
+    SERVICE_URL,
+)
 from .models.models import NimboUser, XYZLayerModel
+
+# Import the code for the DockWidget
+from .nimbo_earth_dockwidget import NimboEarthDockWidget
+
+# Initialize Qt resources from file resources.py
+from .resources import *  # noqa: F403
 from .services.checks import Checks
 from .services.services import Services
 from .style.style import get_style
 
-import requests
-
-# Initialize Qt resources from file resources.py
-from .resources import *
-
-# Import the code for the DockWidget
-from .nimbo_earth_dockwidget import NimboEarthDockWidget
-import os.path
-
 
 class NimboEarth:
-    """QGIS Plugin Implementation."""
+    """
+    QGIS Plugin Implementation.
+
+    This class holds the reference to the plugin and
+    is the place where the main actions of the plugin are implemented.
+    """
 
     def __init__(self, iface):
         """Constructor.
 
-        :param iface: An interface instance that will be passed to this class
+        Parameters
+        ----------
+        iface : QgsInterface
+            An interface instance that will be passed to this class
             which provides the hook by which you can manipulate the QGIS
             application at run time.
-        :type iface: QgsInterface
         """
         # Save reference to the QGIS interface
         self.iface = iface
@@ -67,15 +81,14 @@ class NimboEarth:
         self.checks = Checks()
         self.services = Services()
 
-        # initialize plugin directory
+        # Initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
 
-        # initialize locale
-        locale = QSettings().value('locale/userLocale')[0:2]
+        # Initialize locale
+        locale = QSettings().value("locale/userLocale")[0:2]
         locale_path = os.path.join(
-            self.plugin_dir,
-            'i18n',
-            'NimboEarth_{}.qm'.format(locale))
+            self.plugin_dir, "i18n", "NimboEarth_{}.qm".format(locale)
+        )
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
@@ -84,92 +97,84 @@ class NimboEarth:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&Nimbo Earth')
+        self.menu = self.tr("&Nimbo Earth")
         # TODO: We are going to let the user set this up in a future iteration
-        self.toolbar = self.iface.addToolBar(u'NimboEarth')
-        self.toolbar.setObjectName(u'NimboEarth')
-
-        # print "** INITIALIZING NimboEarth"
+        self.toolbar = self.iface.addToolBar("NimboEarth")
+        self.toolbar.setObjectName("NimboEarth")
 
         self.pluginIsActive = False
         self.dockwidget = None
         self.last_geocredits = None
         self._gc_listener_connected = False
-        self._gc_pending_min = None
-        self._gc_debounce = QTimer()
-        self._gc_debounce.setInterval(500)  # 500 ms
-        self._gc_debounce.setSingleShot(True)
-        self._gc_debounce.timeout.connect(self._flush_geocredit_update)
-
-
-    # noinspection PyMethodMayBeStatic
-
 
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
 
         We implement this ourselves since we do not inherit QObject.
 
-        :param message: String for translation.
-        :type message: str, QString
+        Parameters
+        ----------
+        message : QString
+            String for translation.
 
-        :returns: Translated version of message.
-        :rtype: QString
+        Returns
+        -------
+        QString
+            Translated version of message.
         """
-        # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
-        return QCoreApplication.translate('NimboEarth', message)
-
+        # Noinspection PyTypeChecker,PyArgumentList,PyCallByClass
+        return QCoreApplication.translate("NimboEarth", message)
 
     def add_action(
-            self,
-            icon_path,
-            text,
-            callback,
-            enabled_flag=True,
-            add_to_menu=True,
-            add_to_toolbar=True,
-            status_tip=None,
-            whats_this=None,
-            parent=None):
-        """Add a toolbar icon to the toolbar.
+        self,
+        icon_path,
+        text,
+        callback,
+        enabled_flag=True,
+        add_to_menu=True,
+        add_to_toolbar=True,
+        status_tip=None,
+        whats_this=None,
+        parent=None,
+    ):
+        """
+        Add a toolbar icon to the toolbar.
 
-        :param icon_path: Path to the icon for this action. Can be a resource
-            path (e.g. ':/plugins/foo/bar.png') or a normal file system path.
-        :type icon_path: str
-
-        :param text: Text that should be shown in menu items for this action.
-        :type text: str
-
-        :param callback: Function to be called when the action is triggered.
-        :type callback: function
-
-        :param enabled_flag: A flag indicating if the action should be enabled
-            by default. Defaults to True.
-        :type enabled_flag: bool
-
-        :param add_to_menu: Flag indicating whether the action should also
-            be added to the menu. Defaults to True.
-        :type add_to_menu: bool
-
-        :param add_to_toolbar: Flag indicating whether the action should also
-            be added to the toolbar. Defaults to True.
-        :type add_to_toolbar: bool
-
-        :param status_tip: Optional text to show in a popup when mouse pointer
+        Parameters
+        ----------
+        icon_path : str
+            Path to the icon for this action. Can be a resource path
+            (e.g. ':/plugins/foo/bar.png') or a normal file system path.
+        text : str
+            Text that should be shown in menu items for this action.
+        callback : function
+            Function to be called when the action is triggered.
+        enabled_flag : bool, optional
+            A flag indicating if the action should be enabled by
+            default. Defaults to True.
+        add_to_menu : bool, optional
+            Flag indicating whether the action should also be added
+            to the menu. Defaults to True.
+        add_to_toolbar : bool, optional
+            Flag indicating whether the action should also be added
+            to the toolbar. Defaults to True.
+        status_tip : str, optional
+            Optional text to show in a popup when mouse pointer
             hovers over the action.
-        :type status_tip: str
+        whats_this : str, optional
+            Optional text to show in the status bar when the mouse
+            pointer hovers over the action.
+        parent : QWidget, optional
+            Parent widget for the new action. Defaults to None.
 
-        :param parent: Parent widget for the new action. Defaults None.
-        :type parent: QWidget
-
-        :param whats_this: Optional text to show in the status bar when the
-            mouse pointer hovers over the action.
-
-        :returns: The action that was created. Note that the action is also
+        Returns
+        -------
+        QAction
+            The action that was created.Note that the action is also
             added to self.actions list.
-        :rtype: QAction
         """
 
+        # Add action to menu
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
         action.triggered.connect(callback)
@@ -191,114 +196,119 @@ class NimboEarth:
 
         return action
 
-
     def initGui(self):
-        """Create the menu entries and toolbar icons inside the QGIS GUI."""
+        """
+        Create the menu entries and toolbar icons inside the QGIS GUI.
+        """
 
-        icon_path = ':/plugins/nimbo_earth/assets/icon.png'
+        # Add actions to the toolbar
+        icon_path = ":/plugins/nimbo_earth/assets/icon.png"
         self.add_action(
             icon_path,
-            text=self.tr(u'Import XYZ Layer'),
+            text=self.tr("Nimbo's Earth Basemaps"),
             callback=self.run,
-            parent=self.iface.mainWindow()
+            parent=self.iface.mainWindow(),
         )
         self.add_action(
-            icon_path=':/plugins/nimbo_earth/assets/icon.png',
-            text=self.tr(u'About Nimbo'),
+            icon_path=":/plugins/nimbo_earth/assets/icon.png",
+            text=self.tr("About Nimbo"),
             callback=self.go_to_about,
             parent=self.iface.mainWindow(),
-            add_to_toolbar=False
+            add_to_toolbar=False,
         )
         self.add_action(
-            icon_path=':/plugins/nimbo_earth/assets/question.png',
-            text=self.tr(u'Plugin help'),
+            icon_path=":/plugins/nimbo_earth/assets/question.png",
+            text=self.tr("Plugin help"),
             callback=self.go_to_help,
             parent=self.iface.mainWindow(),
-            add_to_toolbar=False
+            add_to_toolbar=False,
         )
 
-
     def go_to_about(self):
+        """
+        Open the about page
+        """
         webbrowser.open(ABOUT_URL)
-    
-    
-    def go_to_help(self):   
+
+    def go_to_help(self):
+        """
+        Open the help page
+        """
         abs_path = os.path.dirname(os.path.abspath(__file__))
-        help_path = os.path.join(abs_path, 'help/build/html/index.html')
-        help_file = 'file:///'+help_path
+        help_path = os.path.join(abs_path, "help/build/html/index.html")
+        help_file = "file:///" + help_path
         QDesktopServices.openUrl(QUrl(help_file))
 
-    def disconnect_all_signals(self):
-        """Disconnect all signal connections to prevent multiple bindings."""
-        if self.dockwidget is None:
-            return
-            
-        try:
-            self.dockwidget.free_pButton.clicked.disconnect()
-        except TypeError:
-            pass
-        try:
-            self.dockwidget.subscribe_pButton.clicked.disconnect()
-        except TypeError:
-            pass
-        try:
-            self.dockwidget.pricing_pButton.clicked.disconnect()
-        except TypeError:
-            pass
-        try:
-            self.dockwidget.pricing_link.clicked.disconnect()
-        except TypeError:
-            pass
-        try:
-            self.dockwidget.eye_pButton.pressed.disconnect()
-        except TypeError:
-            pass
-        try:
-            self.dockwidget.eye_pButton.released.disconnect()
-        except TypeError:
-            pass
-        try:
-            self.dockwidget.login_pButton.clicked.disconnect()
-        except TypeError:
-            pass
-        try:
-            self.dockwidget.key_pButton.clicked.disconnect()
-        except TypeError:
-            pass
-        try:
-            self.dockwidget.composition_selector_comBox.currentTextChanged.disconnect()
-        except TypeError:
-            pass
-        try:
-            self.dockwidget.month_comBox.currentTextChanged.disconnect()
-        except TypeError:
-            pass
-        try:
-            self.dockwidget.year_comBox.currentTextChanged.disconnect()
-        except TypeError:
-            pass
-        try:
-            self.dockwidget.add_map_cbox_pButton.clicked.disconnect()
-        except TypeError:
-            pass
-        try:
-            self.dockwidget.add_map_list_pButton.clicked.disconnect()
-        except TypeError:
-            pass
-    # --------------------------------------------------------------------------
+    def _get_signals(self):
+        """
+        Get all signal connections
+        """
+        return [
+            (self.dockwidget.freeTry_pButton.clicked, self.add_free_layer),
+            (self.dockwidget.signUp_pButton.clicked, self._open_signup),
+            (self.dockwidget.offers_pButton.clicked, self._open_pricing),
+            (self.dockwidget.offers_link_pButton.clicked, self._open_pricing),
+            (self.dockwidget.dashboard_pButton.clicked, self._open_dashboard),
+            (self.dockwidget.eye_pButton.clicked, self.show_password),
+            (self.dockwidget.email_lineEdit.textChanged, self.check_login_field),
+            (self.dockwidget.password_lineEdit.textChanged, self.check_login_field),
+            (self.dockwidget.APIKey_lineEdit.textChanged, self.check_api_key_field),
+            (self.dockwidget.login_pButton.clicked, self.login),
+            (self.dockwidget.APIKey_pButton.clicked, self.validate_api_key),
+            (
+                self.dockwidget.composition_comBox.currentTextChanged,
+                self.filter_layer_list,
+            ),
+            (self.dockwidget.month_comBox.currentTextChanged, self.filter_layer_list),
+            (self.dockwidget.year_comBox.currentTextChanged, self.filter_layer_list),
+            (self.dockwidget.addLayer_pButton.clicked, self.get_layer),
+        ]
 
+    def _disconnect_all_signals(self):
+        """
+        Disconnect all signal connections to prevent multiple bindings.
+        """
+        for signal, method in self._get_signals():
+            try:
+                signal.disconnect(method)
+            except TypeError:
+                pass
+
+    def _connect_all_signals(self):
+        """
+        Connect all signal connections.
+        """
+        for signal, method in self._get_signals():
+            signal.connect(method)
+
+    def _open_signup(self):
+        """
+        Open the signup page
+        """
+        webbrowser.open(MAPS_URL + "/signup")
+
+    def _open_pricing(self):
+        """
+        Open the pricing page
+        """
+        webbrowser.open(PRICING_URL)
+
+    def _open_dashboard(self):
+        """
+        Open the dashboard page to get API key
+        """
+        webbrowser.open(MAPS_URL + "/myNimbo/dashboard")
 
     def onClosePlugin(self):
-        """Cleanup necessary items here when plugin dockwidget is closed"""
-
-        # print "** CLOSING NimboEarth"
+        """
+        Cleanup necessary items here when plugin dockwidget is closed
+        """
 
         # disconnects
         # don't forget to disconnect push buttons otherwise it will run methods multiple times after reopening
         self.stop_geocredit_listener()
-        self.disconnect_all_signals()
+        self._disconnect_all_signals()
         self.dockwidget.closingPlugin.disconnect(self.onClosePlugin)
-        
 
         # remove this statement if dockwidget is to remain
         # for reuse if plugin is reopened
@@ -308,575 +318,835 @@ class NimboEarth:
 
         self.pluginIsActive = False
 
-
     def unload(self):
-        """Removes the plugin menu item and icon from QGIS GUI."""
-
-        # print "** UNLOAD NimboEarth"
+        """
+        Removes the plugin menu item and icon from QGIS GUI.
+        """
 
         for action in self.actions:
-            self.iface.removePluginWebMenu(self.tr(u'&Nimbo Earth'),action)
+            self.iface.removePluginWebMenu(self.tr("&Nimbo Earth"), action)
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
         del self.toolbar
 
-    # --------------------------------------------------------------------------
+    def _cursor_elements(self):
+        """
+        All elements that need a cursor
 
+        Returns
+        -------
+        list
+            List of elements
+        """
+        return [
+            self.dockwidget.dashboard_pButton,
+            self.dockwidget.eye_pButton,
+            self.dockwidget.offers_link_pButton,
+            self.dockwidget.addLayer_pButton,
+            self.dockwidget.freeTry_pButton,
+            self.dockwidget.signUp_pButton,
+            self.dockwidget.offers_pButton,
+            self.dockwidget.login_pButton,
+            self.dockwidget.APIKey_pButton,
+            self.dockwidget.layer_listWidget,
+            self.dockwidget.nimbo_label,
+            self.dockwidget.kermap_label,
+            self.dockwidget.composition_comBox,
+            self.dockwidget.month_comBox,
+            self.dockwidget.year_comBox,
+            self.dockwidget.tabWidget_Main.tabBar(),
+        ]
+
+    def setCursor(self):
+        """
+        Set cursor for buttons
+        """
+        cursor = QCursor(Qt.CursorShape.PointingHandCursor)
+        for element in self._cursor_elements():
+            element.setCursor(cursor)
 
     def run(self):
-        """Run method that loads and starts the plugin"""
+        """
+        Run method that loads and starts the plugin
+        """
 
         if not self.pluginIsActive:
             self.pluginIsActive = True
 
-            # print "** STARTING NimboEarth"
-
-            # dockwidget may not exist if:
+            # Dockwidget may not exist if:
             #    first run of plugin
             #    removed on close (see self.onClosePlugin method)
-            if self.dockwidget == None:
+            if self.dockwidget is None:
                 # Create the dockwidget (after translation) and keep reference
                 self.dockwidget = NimboEarthDockWidget()
                 get_style(self.dockwidget)
 
             # Disconnect existing connections first to prevent multiple bindings
-            self.disconnect_all_signals()
-            
-            # setting free basemap button event
-            self.dockwidget.free_pButton.clicked.connect(self.addFreeLayer)
-            
-            # setting 3d dem basemap button event
-            # self.dockwidget.layer_dem.clicked.connect(self.add3DLayer)
-            
-            # setting redirect button to nimbo subscription page
-            self.dockwidget.subscribe_pButton.clicked.connect(lambda: webbrowser.open('https://maps.nimbo.earth/freeregister'))
-            
-            # setting redirect button to nimbo pricing page
-            self.dockwidget.pricing_pButton.clicked.connect(lambda: webbrowser.open('https://nimbo.earth/pricing/'))
-            self.dockwidget.pricing_link.clicked.connect(lambda: webbrowser.open('https://nimbo.earth/pricing/'))
-            
-            # setting icons for links
-            self.dockwidget.nimbo_icon_label.setPixmap(QPixmap(":/plugins/nimbo_earth/assets/icon.png"))
-            self.dockwidget.kermap_icon_label.setPixmap(QPixmap(":/plugins/nimbo_earth/assets/kermapLogo.png"))
-            # setting text for links
-            self.dockwidget.nimbo_label.setText('<a style="color: white;font-weight:bold;text-decoration: none;" href="https://nimbo.earth">{0}</a>'.format(self.tr("About Nimbo")))
+            self._disconnect_all_signals()
+            self._connect_all_signals()
+
+            # Set cursor for buttons
+            self.setCursor()
+
+            # Set icons for links
+            self.dockwidget.nimbo_icon_label.setPixmap(
+                QPixmap(":/plugins/nimbo_earth/assets/icon.png")
+            )
+            self.dockwidget.kermap_icon_label.setPixmap(
+                QPixmap(":/plugins/nimbo_earth/assets/kermapLogo.png")
+            )
+
+            # Set text for links
+            self.dockwidget.nimbo_label.setText(
+                '<a style="color: white; font-weight:bold;text-decoration: none;" href="https://nimbo.earth">{0}</a>'.format(
+                    self.tr("About Nimbo")
+                )
+            )
             self.dockwidget.nimbo_label.setOpenExternalLinks(True)
-            self.dockwidget.kermap_label.setText('<a style="color: white;font-weight:bold; text-decoration: none;" href="https://kermap.com/en/our-story/">{0}</a>'.format(self.tr("About Kermap")))
+            self.dockwidget.kermap_label.setText(
+                '<a style="color: white; font-weight:bold; text-decoration: none;" href="https://kermap.com/en/our-story/">{0}</a>'.format(
+                    self.tr("About Kermap")
+                )
+            )
             self.dockwidget.kermap_label.setOpenExternalLinks(True)
-            # disabling second tab widget
-            self.dockwidget.tabWidget.setTabEnabled(1, False)
-            # hiding geocredit label until login
-            self.dockwidget.gc_label.setVisible(False)
 
-            # login or entering API Key
-            self.dockwidget.tabWidget.setCurrentWidget(self.dockwidget.key_tab)
-            self.dockwidget.password_lineEdit.setEchoMode(QLineEdit.Password)
-            self.dockwidget.eye_pButton.setIcon(QIcon(QPixmap(":/plugins/nimbo_earth/assets/eye-off.png")))
-            self.dockwidget.eye_pButton.pressed.connect(self.show_password)
-            self.dockwidget.eye_pButton.released.connect(self.hide_password)
-            self.dockwidget.login_pButton.clicked.connect(self.login)
-            self.dockwidget.key_pButton.clicked.connect(self.update_api_key)
+            # Set corner label
+            self.dockwidget.corner_label.setText(
+                '<a style="color: #3070E1; font-size: 14px; font-weight:bold; text-decoration: underline;" href="https://support-form.kermap.com/">{0}</a>'.format(
+                    self.tr("Help")
+                )
+            )
+            self.dockwidget.corner_label.setOpenExternalLinks(True)
 
-            # selecting layer to add
-            self.dockwidget.composition_selector_comBox.currentTextChanged.connect(self.clear_list_selection)
-            self.dockwidget.month_comBox.currentTextChanged.connect(self.clear_list_selection)
-            self.dockwidget.year_comBox.currentTextChanged.connect(self.clear_list_selection)
-            self.dockwidget.add_map_cbox_pButton.clicked.connect(self.get_layer)
-            self.dockwidget.add_map_list_pButton.clicked.connect(self.get_layer)
+            # Disable second tab widget
+            self.dockwidget.tabWidget_Main.setTabEnabled(1, False)
 
-            # connect to provide cleanup on closing of dockwidget
+            # Hide geocredit label until login
+            self.dockwidget.remaining_label.setVisible(False)
+
+            # Disable login button until login fields are filled
+            self.dockwidget.login_pButton.setEnabled(False)
+            if (
+                self.dockwidget.email_lineEdit.text().strip()
+                and self.dockwidget.password_lineEdit.text().strip()
+            ):
+                self.dockwidget.login_pButton.setEnabled(True)
+                self.dockwidget.login_pButton.setStyleSheet("background-color: #3070E1")
+            else:
+                self.dockwidget.login_pButton.setStyleSheet("background-color: #7498d6")
+
+            # Disable API key button until API key field is filled
+            self.dockwidget.APIKey_pButton.setEnabled(False)
+            if self.dockwidget.APIKey_lineEdit.text().strip():
+                self.dockwidget.APIKey_pButton.setEnabled(True)
+                self.dockwidget.APIKey_pButton.setStyleSheet(
+                    "background-color: #3070E1"
+                )
+            else:
+                self.dockwidget.APIKey_pButton.setStyleSheet(
+                    "background-color: #7498d6"
+                )
+
+            # Set default tab
+            self.dockwidget.tabWidget_Main.setCurrentWidget(self.dockwidget.API_key_tab)
+
+            # Set password visibility
+            self.dockwidget.password_lineEdit.setEchoMode(QLineEdit.EchoMode.Password)
+            self.dockwidget.eye_pButton.setIcon(
+                QIcon(QPixmap(":/plugins/nimbo_earth/assets/eye-off.png"))
+            )
+
+            # Set dashboard icon
+            self.dockwidget.dashboard_pButton.setIcon(
+                QIcon(QPixmap(":/plugins/nimbo_earth/assets/link.png"))
+            )
+
+            # Connect to provide cleanup on closing of dockwidget
             # Disconnect first to avoid multiple connections
             try:
                 self.dockwidget.closingPlugin.disconnect(self.onClosePlugin)
             except TypeError:
                 # No connection exists yet, which is fine
                 pass
+
             self.dockwidget.closingPlugin.connect(self.onClosePlugin)
 
-            # show the dockwidget
-            # TODO: fix to allow choice of dock location
-            self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockwidget)
+            # Show the dockwidget
+            self.iface.addDockWidget(
+                Qt.DockWidgetArea.RightDockWidgetArea, self.dockwidget
+            )
             self.dockwidget.show()
-    
-    
+
     def show_password(self):
-        self.dockwidget.password_lineEdit.setEchoMode(QLineEdit.Normal)
-        self.dockwidget.eye_pButton.setIcon(QIcon(QPixmap(":/plugins/nimbo_earth/assets/eye.png")))
-        self.dockwidget.eye_pButton.setIconSize(QSize(16, 16))
+        """
+        Toggle password visibility
+        """
+        # Change password visibility and icon depending on current state
+        if self.dockwidget.password_lineEdit.echoMode() == QLineEdit.EchoMode.Password:
+            self.dockwidget.password_lineEdit.setEchoMode(QLineEdit.EchoMode.Normal)
+            self.dockwidget.eye_pButton.setIcon(
+                QIcon(QPixmap(":/plugins/nimbo_earth/assets/eye.png"))
+            )
+        else:
+            self.dockwidget.password_lineEdit.setEchoMode(QLineEdit.EchoMode.Password)
+            self.dockwidget.eye_pButton.setIcon(
+                QIcon(QPixmap(":/plugins/nimbo_earth/assets/eye-off.png"))
+            )
 
+    def check_login_field(self):
+        """
+        Check login fields
+        """
+        # Check if the email is provided and valid and if the password is provided
+        ok = bool(self.dockwidget.email_lineEdit.text().strip()) and bool(
+            self.dockwidget.password_lineEdit.text().strip()
+        )
+        # Enable or disable login button accordingly and change color
+        self.dockwidget.login_pButton.setStyleSheet(
+            "background-color: #3070E1" if ok else "background-color: #7498d6"
+        )
+        self.dockwidget.login_pButton.setEnabled(ok)
 
-    def hide_password(self):
-        self.dockwidget.password_lineEdit.setEchoMode(QLineEdit.Password)
-        self.dockwidget.eye_pButton.setIcon(QIcon(QPixmap(":/plugins/nimbo_earth/assets/eye-off.png")))
-        self.dockwidget.eye_pButton.setIconSize(QSize(16, 16))
-
+    def check_api_key_field(self):
+        """
+        Check API key field
+        """
+        # Check if the API key is provided
+        ok = bool(self.dockwidget.APIKey_lineEdit.text().strip())
+        # Enable or disable API key button accordingly and change color
+        self.dockwidget.APIKey_pButton.setStyleSheet(
+            "background-color: #3070E1" if ok else "background-color: #7498d6"
+        )
+        self.dockwidget.APIKey_pButton.setEnabled(ok)
 
     def login(self):
-        # getting email and password from line edit
+        """
+        Get API key and access token from login
+        """
+        # Get email and password from line edit and remove spaces
         self.user.email = self.dockwidget.email_lineEdit.text().strip()
         self.user.password = self.dockwidget.password_lineEdit.text().strip()
 
-        # getting api_key and access_token
-        self.user.api_key = ''
-        access_token = self.services.get_access_token(self.user.email, self.user.password)
-        if access_token is not None:
-            self.user.api_key = self.services.get_kermap_token(access_token)
-            # get user subscription type (FREE/PRO)
-            self.user.subscription_type = self.services.get_user_subscription_type(access_token)
-        else:
-            self.user.api_key = None
-            self.user.subscription_type = None
+        # Try to get access token
+        try:
+            # Get access_token with services
+            self.user.access_token = self.services.get_access_token(
+                self.user.email, self.user.password
+            )
+        except Exception as e:
+            if "401" in str(e):
+                self.iface.messageBar().pushMessage(
+                    self.tr("Error"),
+                    self.tr("Incorrect email or password"),
+                    level=Qgis.MessageLevel.Critical,
+                    duration=5,
+                )
+                QgsMessageLog.logMessage(str(e), level=Qgis.MessageLevel.Critical)
+            elif "email is not valid" in str(e):
+                self.iface.messageBar().pushMessage(
+                    self.tr("Error"),
+                    self.tr("Incorrect syntax for email"),
+                    level=Qgis.MessageLevel.Critical,
+                    duration=5,
+                )
+                QgsMessageLog.logMessage(str(e), level=Qgis.MessageLevel.Critical)
+            else:
+                self.iface.messageBar().pushMessage(
+                    self.tr("Error"),
+                    str(e),
+                    level=Qgis.MessageLevel.Critical,
+                    duration=5,
+                )
+                QgsMessageLog.logMessage(str(e), level=Qgis.MessageLevel.Critical)
+            return
 
-        # setting token to api key line edit
-        if self.user.api_key is not None:
-            # self.dockwidget.key_input_lineEdit.setText(self.user.api_key)
-            self.validate_api_key(self.user.api_key)
-        else:
-            self.iface.messageBar().pushMessage(self.tr("Error"), self.tr("Incorrect email or password "), level=2, duration=5)
+        # Try to get kermap token
+        try:
+            # Get kermap token (API key)
+            self.user.api_key = self.services.get_kermap_token(self.user.access_token)
+        except Exception as e:
+            self.iface.messageBar().pushMessage(
+                self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5
+            )
+            QgsMessageLog.logMessage(str(e), level=Qgis.MessageLevel.Critical)
+            return
 
+        # Send API key to connect to Nimbo Earth Maps
+        self.send_api_key()
 
-    def update_api_key(self):
-        """update the api key value from the input of the line edit"""
-        # resetting api key
-        self.user.api_key = ''
-        # getting the api key copied in the line edit
-        self.user.api_key = self.dockwidget.key_input_lineEdit.text().strip()
-        # checking api key validity
-        self.validate_api_key(self.user.api_key)
+    def validate_api_key(self):
+        """
+        Get API key from api key line edit
+        """
+        # Reset API key
+        self.user.api_key = ""
+        # Get API key from line edit
+        self.user.api_key = self.dockwidget.APIKey_lineEdit.text().strip()
+        # Send API key to connect to Nimbo Earth Maps
+        self.send_api_key()
 
+    def send_api_key(self):
+        """
+        Send API key to Kermap backend and update layer selection
+        """
 
-    def validate_api_key(self, api_key):
-        """checks if the api key is valid"""
-        # getting the base service url and adding the api key to it
-        request_url = SERVICE_URL + api_key
-
-        headers = {'User-Agent': "QGIS Nimbo plugin"}
-        # making a request with the url to see if the response status is 200 or not
-        # if status is 200 then update the layer selection with the list of urls availables
-        # else raising exceptions
-        response = requests.get(request_url, headers=headers) 
-        if response.status_code == 200:
-            self.get_geocredits(response)
-            self.start_geocredit_listener()  # <<--- nouveau
-            # Set user subscription type from API key
-            self.user.subscription_type = self.services.get_user_subscription_type_from_kermap_token(api_key)
-            xml_file = response.content
-            self.iface.messageBar().pushMessage(self.tr("Success"), self.tr("Your API key is valid"), level=3, duration=5)
-            self.update_layer_selection(xml_file, api_key)
-        else:
-            self.iface.messageBar().pushMessage(self.tr("Error"), self.tr("Your API Key is not valid"), level=2, duration=5)
-
-
-    def get_geocredits(self, response):
-        geocredit = int(response.headers['X-Kermap-Available-Credits'])
-        self.last_geocredits = geocredit
-        if geocredit >= 1000:
-            geocredit = format(geocredit/1000, ".2f")
-            label = str(geocredit)+"K"
-            self.dockwidget.geocredit_label.setStyleSheet('QLabel[objectName^="geocredit_label"]{color: #00b400;}')
-        else: 
-            label = str(geocredit)
-            self.dockwidget.geocredit_label.setStyleSheet('QLabel[objectName^="geocredit_label"]{color: red;}')
-        self.dockwidget.gc_label.setVisible(True)    
-        self.dockwidget.geocredit_label.setText(label)
-
+        # Try to get user informations and update layer selection
+        try:
+            # Make a request with the url to see if the response status is 200 or not
+            response = self.services.get_user_informations(self.user.api_key)
+            # If the response is None, show error message
+            if response is None:
+                self.iface.messageBar().pushMessage(
+                    self.tr("Error"),
+                    self.tr("Your API Key is not valid"),
+                    level=Qgis.MessageLevel.Critical,
+                    duration=5,
+                )
+                QgsMessageLog.logMessage(
+                    "Your API Key is not valid", level=Qgis.MessageLevel.Critical
+                )
+                return
+            # Update the layer selection with the list of urls availables and geocredits
+            if response.status_code == 200:
+                self.update_geocredits_label(
+                    int(response.headers["X-Kermap-Available-Credits"])
+                )
+                self.start_geocredit_listener()
+                # Set user subscription type from API key
+                self.user.subscription_type = (
+                    self.services.get_user_subscription_type_from_kermap_token(
+                        self.user.api_key
+                    )
+                )
+                xml_file = response.content
+                self.iface.messageBar().pushMessage(
+                    self.tr("Success"),
+                    self.tr("Your API key is valid"),
+                    level=Qgis.MessageLevel.Success,
+                    duration=5,
+                )
+                self.update_layer_selection(xml_file)
+            # Show error message
+            else:
+                self.iface.messageBar().pushMessage(
+                    self.tr("Error"),
+                    self.tr("An error occurred with your API key"),
+                    level=Qgis.MessageLevel.Critical,
+                    duration=5,
+                )
+                QgsMessageLog.logMessage(
+                    "An error occurred with your API key",
+                    level=Qgis.MessageLevel.Critical,
+                )
+        except Exception as e:
+            self.iface.messageBar().pushMessage(
+                self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5
+            )
+            QgsMessageLog.logMessage(str(e), level=Qgis.MessageLevel.Critical)
+            return
 
     def start_geocredit_listener(self):
+        """
+        Start listening for geocredit updates
+        """
+        # If already connected, do nothing
         if self._gc_listener_connected:
             return
+
+        # Try to connect to the geocredit listener (see _on_reply_finished)
         try:
             nam = QgsNetworkAccessManager.instance()
             nam.finished.connect(self._on_reply_finished)
             self._gc_listener_connected = True
+        # If it fails, do nothing and show an error
         except Exception as e:
-            print(f"[Nimbo] Failed to start geocredit listener: {e}")
-
+            self.iface.messageBar().pushMessage(
+                self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5
+            )
+            QgsMessageLog.logMessage(
+                f"[Nimbo] Failed to start geocredit listener: {e}",
+                level=Qgis.MessageLevel.Critical,
+            )
 
     def stop_geocredit_listener(self):
-        """Déconnecte le listener pour éviter les doublons / fuites de signaux."""
+        """
+        Stop listening for geocredit updates
+        """
+        # If not connected, do nothing
         if not self._gc_listener_connected:
             return
+
+        # Try to disconnect from the geocredit listener (see _on_reply_finished)
         try:
             nam = QgsNetworkAccessManager.instance()
             nam.finished.disconnect(self._on_reply_finished)
             self._gc_listener_connected = False
+        # If it fails, do nothing and show an error
         except Exception as e:
-            # Si déjà déconnecté ailleurs, on ignore
-            print(f"[Nimbo] Failed to stop geocredit listener: {e}")
-
+            self.iface.messageBar().pushMessage(
+                self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5
+            )
+            QgsMessageLog.logMessage(
+                f"[Nimbo] Failed to stop geocredit listener: {e}",
+                level=Qgis.MessageLevel.Critical,
+            )
 
     def _on_reply_finished(self, reply):
         """
-        Callback sur chaque QNetworkReply fini.
-        Si l'en-tête X-Kermap-Available-Credits est présent et a diminué,
-        on met à jour le label.
+        Callback on each QNetworkReply finished.
+        If the reply contains an X-Kermap-Available-Credits header,
+        we update the label if the value has decreased.
         """
+        # Try to get the X-Kermap-Available-Credits header (geocredits)
         try:
-            # 1) Récupère l'en-tête s'il existe
-            header_name = b'X-Kermap-Available-Credits'
-            if hasattr(reply, "rawHeader"):
-                raw_val = reply.rawHeader(header_name)
-            else:
-                raw_val = None
+            # If the reply is not from nimbo.earth, do nothing
+            if "nimbo.earth" not in reply.request().url().toString():
+                return
 
-            if not raw_val:
-                return  # rien à faire si l'en-tête n’est pas présent
+            # If the reply doesn't have a rawHeader, do nothing
+            if not hasattr(reply, "rawHeader"):
+                return
+            # Register the new value of geocredits
+            raw_val = reply.rawHeader(b"X-Kermap-Available-Credits")
 
-            # 2) Parse int (sécurisé)
+            # Parse the new value into an int
             try:
                 new_val = int(bytes(raw_val).decode("utf-8").strip())
-            except Exception:
+            except Exception as e:
+                self.iface.messageBar().pushMessage(
+                    self.tr("Error"),
+                    str(e),
+                    level=Qgis.MessageLevel.Critical,
+                    duration=5,
+                )
+                QgsMessageLog.logMessage(
+                    f"Error to parse geocredits: {e}", level=Qgis.MessageLevel.Critical
+                )
                 return
 
-            # 3) Si on n’a pas encore de valeur, on initialise
+            # If the new value is lower than the last one or if there is no last value, update the label
             if self.last_geocredits is None:
-                self.last_geocredits = new_val
+                self.update_geocredits_label(new_val)
                 return
 
-            # 4) Mettre à jour uniquement si ça BAISSE
             if new_val < self.last_geocredits:
-                self._set_geocredit_label(new_val)
-                self.last_geocredits = new_val
+                self.update_geocredits_label(new_val)
+        # If it fails, do nothing
         except Exception as e:
-            print(f"[Nimbo] Error in _on_reply_finished: {e}")
+            self.iface.messageBar().pushMessage(
+                self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5
+            )
+            QgsMessageLog.logMessage(
+                f"[Nimbo] Error in _on_reply_finished: {e}",
+                level=Qgis.MessageLevel.Critical,
+            )
 
-
-    def _set_geocredit_label(self, geocredit_int):
+    def update_geocredits_label(self, geocredit_int):
         """
-        Met à jour le label + couleur exactement comme get_geocredits(),
-        mais à partir d'une valeur entière déjà connue.
+        Update geocredits label with the new value
         """
-        try:
-            if geocredit_int >= 1000:
-                label = f"{format(geocredit_int/1000, '.2f')}K"
-                self.dockwidget.geocredit_label.setStyleSheet(
-                    'QLabel[objectName^="geocredit_label"]{color: #00b400;}'
-                )
-            else:
-                label = str(geocredit_int)
-                self.dockwidget.geocredit_label.setStyleSheet(
-                    'QLabel[objectName^="geocredit_label"]{color: red;}'
-                )
-            self.dockwidget.gc_label.setVisible(True)
-            self.dockwidget.geocredit_label.setText(label)
-        except Exception as e:
-            print(f"[Nimbo] Failed to update geocredit label: {e}")
-    
-    def _maybe_queue_geocredit_update(self, new_val: int):
-        if self.last_geocredits is None:
-            self.last_geocredits = new_val
-            return
-        if new_val >= self.last_geocredits:
-            return  # on ne met à jour que si ça baisse
+        # Update last geocredits
+        self.last_geocredits = geocredit_int
 
-        # On enregistre la plus petite valeur observée pendant la fenêtre
-        if self._gc_pending_min is None or new_val < self._gc_pending_min:
-            self._gc_pending_min = new_val
+        # Prepare geocredits text and color, if geocredits are more than 1000, show K
+        if geocredit_int >= 1000:
+            label = f"{round(geocredit_int / 1000, 2)}K"
+            color = "#00b400"
+        else:
+            label = str(geocredit_int)
+            color = "red"
 
-        if not self._gc_debounce.isActive():
-            self._gc_debounce.start()
+        # Update geocredits label and style
+        self.dockwidget.geocredit_label.setStyleSheet(
+            f'QLabel[objectName^="geocredit_label"]{{color: {color};}}'
+        )
+        self.dockwidget.geocredit_label.setText(label)
+        self.dockwidget.remaining_label.setVisible(True)
 
-    def _flush_geocredit_update(self):
-        if self._gc_pending_min is None:
-            return
-        # Mise à jour réelle du label une seule fois
-        self._set_geocredit_label(self._gc_pending_min)
-        self.last_geocredits = self._gc_pending_min
-        self._gc_pending_min = None
+    def update_layer_selection(self, xml_file):
+        """
+        Update layer selection with the list of available layers
+        using the xml file
+        """
 
-   
-    def update_layer_selection(self, xml_file, api_key):
-        # getting the tile maps list
-        self.tile_maps = self.services.get_tile_maps(xml_file, self.user.subscription_type)
+        # Get the tile maps list
+        self.tile_maps = self.services.get_tile_maps(xml_file)
 
-        # --- Patch: ensure year is always valid for FREE users ---
-        if hasattr(self.user, 'subscription_type') and self.user.subscription_type == 'FREE':
-            for layer in self.tile_maps.layers:
-                # If year is not a valid integer, try to re-parse from title or href
-                try:
-                    int(layer.year)
-                except Exception:
-                    # Try to parse from title (prefer title for watermark)
-                    parts = layer.title.split('_')
-                    if len(parts) == 4 and parts[0].lower() == 'watermark':
-                        layer.year = parts[1]
-                    else:
-                        href_parts = layer.href.split('/')[-1].split('@')[0].split('_')
-                        if len(href_parts) == 4 and href_parts[0].lower() == 'watermark':
-                            layer.year = href_parts[1]
-        # --- End patch ---
-
-        # populating the combo boxes and the list widget
+        # Populate the combo boxes and the list widget
         self.populating_cbboxes_and_listwidget()
-        # changing the tab for the user to select the layer
-        self.dockwidget.tabWidget.setTabEnabled(1, True)
-        self.dockwidget.tabWidget.setCurrentWidget(self.dockwidget.tms_tab)
 
+        # Change the tab for the user to select the layer
+        self.dockwidget.tabWidget_Main.setTabEnabled(1, True)
+        self.dockwidget.tabWidget_Main.setCurrentWidget(self.dockwidget.Layers_tab)
 
     def populating_cbboxes_and_listwidget(self):
-        # populating image composition combo box if empty
-        if self.dockwidget.composition_selector_comBox.count() == 0:
-            # Only allow RGB && HD for FREE/watermark users
-            if hasattr(self.user, 'subscription_type') and self.user.subscription_type == 'FREE':
-                compositions = self.services.get_composition_from_layers(self.tile_maps)
-                for composition in compositions:
-                    if composition == 5 or composition == 1:
-                        self.dockwidget.composition_selector_comBox.addItem(ImageComposition(composition).describe())
-                self.dockwidget.composition_selector_comBox.setCurrentText(ImageComposition.HD.describe())
-            # Only allow RGB, INFRARED, VEGETATION and RADAR for PRO users
-            elif hasattr(self.user, 'subscription_type') and self.user.subscription_type == 'PRO':
-                compositions = self.services.get_composition_from_layers(self.tile_maps)
-                for composition in compositions:
-                    if composition != 5:
-                        self.dockwidget.composition_selector_comBox.addItem(ImageComposition(composition).describe())
-                self.dockwidget.composition_selector_comBox.setCurrentText(ImageComposition.NATURAL.describe())
-            # Allow all compositions for other users (PRO HD)
-            else:
-                compositions = self.services.get_composition_from_layers(self.tile_maps)
-                for composition in compositions:
-                    self.dockwidget.composition_selector_comBox.addItem(ImageComposition(composition).describe())
-                self.dockwidget.composition_selector_comBox.setCurrentText(ImageComposition.NATURAL.describe())
-        # populating year combo box if empty
-        if self.dockwidget.year_comBox.count() == 0:
-            for year in range(self.services.get_min_year(self.tile_maps), self.services.get_max_year(self.tile_maps)+1):
-                self.dockwidget.year_comBox.addItem(str(year))
-                self.dockwidget.year_comBox.setCurrentText(str(self.services.get_max_year(self.tile_maps)))
+        """
+        Populating the combo boxes and the list widget
+        """
+        self._populate_composition_combox()
+        self._populate_year_combox()
+        self._populate_month_combox()
+        self._populate_layer_list()
 
-        # populating month combo box depending on year selected
-        self.month_selection()
-        self.dockwidget.year_comBox.currentTextChanged.connect(self.month_selection)
-
-        # adding layers to the listWidget
-        self.dockwidget.layer_listWidget.clear()
-
-        # Heuristic: if there are no dated (year+month) non-RGB layers in the dataset, we consider the user FREE for dated PRO
-        has_dated_pro_layers = False
-        for l in self.tile_maps.layers:
-            try:
-                comp_name = self.services.get_composition_name(l.composition)
-            except Exception:
-                comp_name = ''
-            if comp_name != ImageComposition.NATURAL.__str__() and getattr(l, 'year', '') and getattr(l, 'month', ''):
-                has_dated_pro_layers = True
-                break
-
-        # Build list, interleaving placeholders right after each dated RGB when FREE
-        for layer in self.tile_maps.layers:
-            # Base item text
-            if "no title set" in layer.title:
-                month_name = self.services.get_month_name(layer.month)
-                comp_name = self.services.get_composition_name(layer.composition)
-                base_text = f"{month_name} {layer.year} {comp_name}"
-            else:
-                base_text = layer.title
-                # Also compute comp_name for condition below
-                try:
-                    comp_name = self.services.get_composition_name(layer.composition)
-                except Exception:
-                    comp_name = ''
-
-            # If user is FREE, ignore real non-RGB compositions (NIR/NDVI/RADAR/HD)
-            if (getattr(self.user, 'subscription_type', None) == 'FREE') and comp_name != ImageComposition.NATURAL.__str__() and comp_name != ImageComposition.HD.__str__():
-                # Skip adding the actual item for non-RGB
-                pass
-            else:
-                self.dockwidget.layer_listWidget.addItem(base_text)
-
-            # Interleave placeholders if user is FREE and this is a dated RGB
-            if (getattr(self.user, 'subscription_type', None) == 'FREE') and comp_name == ImageComposition.NATURAL.__str__() and getattr(layer, 'year', '') and getattr(layer, 'month', ''):
-                month_name = self.services.get_month_name(str(layer.month))
-                year = str(layer.year)
-                for comp_label in [
-                    ImageComposition.INFRARED.__str__(),
-                    ImageComposition.VEGETATION.__str__(),
-                    ImageComposition.RADAR.__str__(),
-                ]:
-                    text = f"{month_name} {year} {comp_label} [PAID PLAN ONLY]"
-                    item = QListWidgetItem(text)
-                    item.setFlags(item.flags() & ~Qt.ItemIsEnabled & ~Qt.ItemIsSelectable)
-                    item.setToolTip(self.tr("This layer is available with PAID plans only."))
-                    self.dockwidget.layer_listWidget.addItem(item)
-            # Interleave placeholders if user is PRO and this is a dated RGB (only for HD since PRO doesn't have access)
-            if (getattr(self.user, 'subscription_type', None) == 'PRO') and comp_name == ImageComposition.NATURAL.__str__() and getattr(layer, 'year', '') and getattr(layer, 'month', ''):
-                month_name = self.services.get_month_name(str(layer.month))
-                year = str(layer.year)
-                for comp_label in [
-                    ImageComposition.HD.__str__(),
-                ]:
-                    text = f"{month_name} {year} {comp_label} [PAID PLAN ONLY]"
-                    item = QListWidgetItem(text)
-                    item.setFlags(item.flags() & ~Qt.ItemIsEnabled & ~Qt.ItemIsSelectable)
-                    item.setToolTip(self.tr("This layer is available with PAID plans only."))
-                    self.dockwidget.layer_listWidget.addItem(item)
-            # Note: PRO HD users don't get placeholders for HD since they have access to it
-        self.reverse_sort_layers()
-            
-
-    def month_selection(self):
-        # clear the combobox
-        self.dockwidget.month_comBox.clear()
-
-        if self.dockwidget.month_comBox.count() == 0:
-            # getting all months for a semected year
-            months = self.services.get_month_for_this_year(self.dockwidget.year_comBox.currentText(), self.tile_maps)
-            # getting month name et adding it to the combo box
-            for month in months:
-                self.dockwidget.month_comBox.addItem(self.services.get_month_name(str(month)))
-
-
-    def clear_list_selection(self):
-        self.dockwidget.layer_listWidget.clearSelection()
-
-    def reverse_sort_layers(self):
-        # Collect item properties to preserve flags/tooltips
-        items_data = []
-        for i in range(self.dockwidget.layer_listWidget.count()):
-            it = self.dockwidget.layer_listWidget.item(i)
-            items_data.append((it.text(), it.flags(), it.toolTip()))
-        # print('items_data ===', items_data)
-        # If no placeholders, keep simple reverse for backward compatibility
-        has_placeholders = any('[PRO ONLY]' in text for (text, _, _) in items_data)
-        if not has_placeholders:
-            items_data = list(reversed(items_data))
-            self.dockwidget.layer_listWidget.clear()
-            for text, flags, tooltip in items_data:
-                it = QListWidgetItem(text)
-                it.setFlags(flags)
-                if tooltip:
-                    it.setToolTip(tooltip)
-                self.dockwidget.layer_listWidget.addItem(it)
+    def _populate_composition_combox(self):
+        """
+        Populating the composition combo box
+        """
+        # Try to get the list of compositions
+        try:
+            # Get the list of compositions from the user subscription
+            compositions = self.services.get_compositions_mapping(
+                self.user.subscription_type
+            ).values()
+        except Exception as e:
+            self.iface.messageBar().pushMessage(
+                self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5
+            )
+            QgsMessageLog.logMessage(str(e), level=Qgis.MessageLevel.Critical)
             return
 
-        # Group by (year, month) so placeholders stay next to their RGB after reversing
-        month_to_num = {
-            'January': 1, 'February': 2, 'March': 3, 'April': 4, 'May': 5, 'June': 6,
-            'July': 7, 'August': 8, 'September': 9, 'October': 10, 'November': 11, 'December': 12,
-        }
-        groups = {}
-        others = []
-        for text, flags, tooltip in items_data:
-            parts = text.split(' ')
-            if len(parts) >= 3 and parts[0] in month_to_num and parts[1].isdigit():
-                key = (int(parts[1]), month_to_num[parts[0]])
-                groups.setdefault(key, []).append((text, flags, tooltip))
-            else:
-                others.append((text, flags, tooltip))
+        # Clear and populate the combo box
+        self.dockwidget.composition_comBox.clear()
+        self.dockwidget.composition_comBox.addItem("All")
+        self.dockwidget.composition_comBox.setCurrentText("All")
+        for composition in compositions:
+            self.dockwidget.composition_comBox.addItem(composition)
 
-        # Sort groups newest first
-        sorted_keys = sorted(groups.keys(), key=lambda k: (k[0], k[1]), reverse=True)
-        # Rebuild list: within each group, put RGB first then placeholders (NIR, NDVI, RADAR)
-        ordered_items = []
-        for key in sorted_keys:
-            items = groups[key]
-            rgb = [it for it in items if ('[PRO ONLY]' not in it[0]) and (' RGB' in it[0])]
-            placeholders_nir = [it for it in items if ('[PRO ONLY]' in it[0]) and (' NIR ' in it[0])]
-            placeholders_ndvi = [it for it in items if ('[PRO ONLY]' in it[0]) and (' NDVI ' in it[0])]
-            placeholders_radar = [it for it in items if ('[PRO ONLY]' in it[0]) and (' RADAR ' in it[0])]
-            placeholders_HD = [it for it in items if ('[PRO ONLY]' in it[0]) and (' SUPER RESOLUTION' in it[0])]
-            others_real = [it for it in items if ('[PRO ONLY]' not in it[0]) and (' RGB' not in it[0])]
-            ordered_items.extend(rgb + placeholders_nir + placeholders_ndvi + placeholders_radar + placeholders_HD + others_real)
+    def _populate_year_combox(self):
+        """
+        Populating the year combo box
+        """
+        # Clear the combobox
+        self.dockwidget.year_comBox.clear()
+        self.dockwidget.year_comBox.addItem("All")
+        self.dockwidget.year_comBox.setCurrentText("All")
 
-        # Append non-dated items reversed to keep prior overall reverse behavior
-        ordered_items.extend(list(reversed(others)))
+        try:
+            years = self.services.get_years()
+            sorted_years = sorted(years)
+        except Exception as e:
+            self.iface.messageBar().pushMessage(
+                self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5
+            )
+            QgsMessageLog.logMessage(str(e), level=Qgis.MessageLevel.Critical)
+            return
+        for year in sorted_years:
+            self.dockwidget.year_comBox.addItem(str(year))
 
-        # Rebuild list preserving flags and tooltips
+    def _populate_month_combox(self):
+        """
+        Populating the month combo box
+        """
+        # Clear the combobox
+        self.dockwidget.month_comBox.clear()
+        self.dockwidget.month_comBox.addItem("All")
+        self.dockwidget.month_comBox.setCurrentText("All")
+
+        # Populate the combobox
+        for month in range(12):
+            self.dockwidget.month_comBox.addItem(
+                self.services.get_month_name(month + 1)
+            )
+
+    def _populate_layer_list(self):
+        """
+        Populating the layer list
+        """
+        # Clear the list widget
         self.dockwidget.layer_listWidget.clear()
-        for text, flags, tooltip in ordered_items:
+
+        # Try to get the list of allowed layers
+        try:
+            # Get the list of allowed layers
+            href_allowed = self.services.get_href_compositions_from_subscription_type(
+                self.user.subscription_type
+            )
+        except Exception as e:
+            self.iface.messageBar().pushMessage(
+                self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5
+            )
+            QgsMessageLog.logMessage(str(e), level=Qgis.MessageLevel.Critical)
+            return
+
+        # Try to get the list of compositions
+        try:
+            # Get the list of compositions from the user subscription
+            compositions_map = self.services.get_compositions_mapping("ALL")
+        except Exception as e:
+            self.iface.messageBar().pushMessage(
+                self.tr("Error"), str(e), level=Qgis.MessageLevel.Critical, duration=5
+            )
+            QgsMessageLog.logMessage(str(e), level=Qgis.MessageLevel.Critical)
+            return
+
+        # Get the list of watermarked compositions
+        watermarked_compositions = set()
+
+        # Check if the layer is a watermark
+        is_watermark = False
+
+        # Populate the list widget
+        for layer in self.tile_maps.layers:
+            if self.checks.isValidLayer(layer.href, href_allowed):
+                # Check if the layer is a watermark
+                is_watermark = "watermark" in layer.href.lower()
+
+                # Add the composition to the set of watermarked compositions
+                if (
+                    is_watermark
+                    and compositions_map.get(int(layer.composition))
+                    not in watermarked_compositions
+                ):
+                    watermarked_compositions.add(
+                        compositions_map.get(int(layer.composition))
+                    )
+
+                item = self._item_from_layer(
+                    is_watermark, False, layer, compositions_map
+                )
+
+                # Add the item
+                self.dockwidget.layer_listWidget.addItem(item)
+
+            else:
+                if int(layer.composition) in compositions_map:
+                    # Create the item
+                    item = self._item_from_layer(False, True, layer, compositions_map)
+
+                    # Add the item
+                    self.dockwidget.layer_listWidget.addItem(item)
+
+        if is_watermark:
+            for comp_int, comp_name in compositions_map.items():
+                if comp_name not in watermarked_compositions:
+                    # Create the layer
+                    layer = XYZLayerModel(
+                        title=f"{comp_name}",
+                        href=None,
+                        year=None,
+                        month=None,
+                        composition=comp_int,
+                    )
+
+                    # Create the item
+                    item = self._item_from_layer(False, True, layer, compositions_map)
+
+                    # Add the item
+                    self.dockwidget.layer_listWidget.addItem(item)
+
+        # Sort the layer list
+        self._sort_layer_list()
+
+    def _item_from_layer(self, is_watermark, is_placeholder, layer, compositions_map):
+        """
+        Creating the item from the layer list
+
+        Parameters
+        ----------
+        is_watermark : bool
+            True if the layer is a watermark
+        is_placeholder : bool
+            True if the layer is a placeholder
+        layer : LayerRecord
+            Layer record
+        compositions_map : dict
+            Dictionary of compositions
+
+        Returns
+        -------
+        item : QListWidgetItem
+            Item from the layer list
+        """
+        # Get the layer title and add watermark label if the layer is a watermark
+        if is_watermark:
+            text = f"{layer.title} {NIMBO_WATERMARK_LABEL}"
+        elif is_placeholder:
+            text = f"{layer.title} {PAID_PLAN_LABEL}"
+        else:
+            text = layer.title
+
+        # Create the item
+        item = QListWidgetItem(text)
+
+        # Add a tooltip if the layer is a watermark
+        if is_watermark:
+            item.setToolTip(
+                self.tr(
+                    "This layer is watermarked. Upgrade your plan to get full access."
+                )
+            )
+        # Add a tooltip and disable the item if the layer is a placeholder
+        elif is_placeholder:
+            item.setFlags(
+                item.flags()
+                & ~Qt.ItemFlag.ItemIsEnabled
+                & ~Qt.ItemFlag.ItemIsSelectable
+            )
+            item.setToolTip(self.tr("This layer is available with PAID plans only."))
+
+        # Set the data of the item to the list widget
+        item.setData(
+            Qt.ItemDataRole.UserRole,
+            {
+                "year": int(layer.year) if layer.year is not None else None,
+                "month": int(layer.month) if layer.month is not None else None,
+                "composition": compositions_map.get(int(layer.composition)),
+                "is_placeholder": is_placeholder,
+                "is_watermark": is_watermark,
+                "href": layer.href if not is_placeholder else None,
+            },
+        )
+
+        return item
+
+    def _sort_layer_list(self):
+        """
+        Sort the list of layers in reverse chronological order (from newest to newest)
+        """
+        # Create an empty list
+        items = []
+        # Add the items to the list with the data, text, flags and tooltip
+        for i in range(self.dockwidget.layer_listWidget.count()):
+            it = self.dockwidget.layer_listWidget.item(i)
+            items.append(
+                (it.data(Qt.ItemDataRole.UserRole), it.text(), it.flags(), it.toolTip())
+            )
+
+        # Sort the list by year desc and month desc
+        items.sort(
+            key=lambda x: (
+                -x[0]["year"] if x[0]["year"] is not None else 0,
+                -x[0]["month"] if x[0]["month"] is not None else 0,
+            )
+        )
+
+        # Clear the list widget
+        self.dockwidget.layer_listWidget.clear()
+        # Add the sorted items to the list widget
+        for data, text, flags, tooltip in items:
             it = QListWidgetItem(text)
             it.setFlags(flags)
+            it.setData(Qt.ItemDataRole.UserRole, data)
             if tooltip:
                 it.setToolTip(tooltip)
             self.dockwidget.layer_listWidget.addItem(it)
 
+    def filter_layer_list(self):
+        """
+        Filter the layer list according to the selected year, month and composition
+        """
+        # Get the selected year, month and composition
+        selected_year = self.dockwidget.year_comBox.currentText()
+        selected_month = self.dockwidget.month_comBox.currentText()
+        selected_composition = self.dockwidget.composition_comBox.currentText()
+
+        # Hide the layers that don't match the selected year, month and composition
+        for i in range(self.dockwidget.layer_listWidget.count()):
+            item = self.dockwidget.layer_listWidget.item(i)
+            data = item.data(Qt.ItemDataRole.UserRole)
+
+            # Check if the year of the layer matches the selected year
+            year_match = selected_year == "All" or str(data["year"]) == selected_year
+
+            # Check if the month of the layer matches the selected month
+            month_match = selected_month == "All" or (
+                data["month"] is not None
+                and self.services.get_month_name(data["month"]) == selected_month
+            )
+
+            # Check if the composition of the layer matches the selected composition
+            compo_match = (
+                selected_composition == "All"
+                or data["composition"] == selected_composition
+            )
+
+            # Hide the layer if it doesn't match the selected year, month and composition
+            item.setHidden(not (year_match and month_match and compo_match))
+
     def get_layer(self):
-        # re-initializing the layer
-        layer = XYZLayerModel()
-
-        # if an item is selected on the list
-        if len(self.dockwidget.layer_listWidget.selectedItems()) != 0:
-            value = self.dockwidget.layer_listWidget.currentItem()
-            # getting year, month and composition from the item selected
-            data_retrieved = value.text().split(" ")
-            layer = self.services.filtering_layers(data_retrieved)
-            if layer is not None:
-                self.add_layer(layer)
-
+        """
+        Get the selected layer
+        """
+        # If no layer is selected, do nothing
+        if len(self.dockwidget.layer_listWidget.selectedItems()) == 0:
+            return
         else:
-            # getting the composition value form the combobox
-            composition_value = self.dockwidget.composition_selector_comBox.currentText()
+            # Get the selected item
+            item = self.dockwidget.layer_listWidget.currentItem()
 
-            # getting the enum value from composition_value
-            composition_string = ''
-            for composition in ImageComposition:
-                if composition_value.upper() == composition.name:
-                    composition_string = composition.__str__()
-
-            # getting the month value from the combo box
-            month = self.dockwidget.month_comBox.currentText()
-
-            # getting the year value from the combo box
-            year = self.dockwidget.year_comBox.currentText()
-            # assembling data in list
-            data_retrieved = [month, year, composition_string]
-            self.layer = self.services.filtering_layers(data_retrieved)
-            if self.layer:
-                self.add_layer(self.layer)
-            else:
-                self.iface.messageBar().pushMessage(
-                    self.tr("Warning"),
-                    self.tr("No Layer with those parameters: please change date or composition"), level=1, duration=5
-                )
-
+            # Get the data
+            data = item.data(Qt.ItemDataRole.UserRole)
+            # Add the layer if it has a href
+            if data["href"] is not None:
+                self.add_layer(item)
 
     def add_layer(self, layer):
-        # Construct the correct layer identifier in the URL based on user type
-        year = str(layer.year)
-        month_raw = str(layer.month)
-        compo = str(layer.composition)
-        if hasattr(self.user, 'subscription_type') and self.user.subscription_type == 'FREE':
-            layer_id = f"watermark_{year}_{month_raw}_{compo}"
-        else:
-            # PRO: do not zero-pad month
-            month = str(int(month_raw)) if month_raw.isdigit() else month_raw
-            layer_id = f"{year}_{month}_{compo}"
-        # Build the full href using the correct layer_id
-        base_url = layer.href.split('/tms/1.0.0/')[0] + '/tms/1.0.0/'
-        layer.href = f"type=xyz&url={base_url}{layer_id}@kermap/{{z}}/{{x}}/{{-y}}.png?kermap_token={self.user.api_key}"
-        if "no title set" in layer.title:
-            title = self.services.get_month_name(str(layer.month)) + ' ' + layer.year + ' ' + self.services.get_composition_name(layer.composition)
-            rlayer = QgsRasterLayer(layer.href, title, "wms")
-        else:
-            rlayer = QgsRasterLayer(layer.href, layer.title, "wms")
+        """
+        Add the selected layer to the map
+        """
+        # Get the layer title and href
+        title_layer = layer.text()
+        href_layer = layer.data(Qt.ItemDataRole.UserRole)["href"]
 
-        if rlayer.isValid():
-            QgsProject().instance().addMapLayer(rlayer)
-            self.iface.messageBar().pushMessage(self.tr("Success"), self.tr("Layer added - wait until loading is complete"), level=3, duration=5)
+        # Get the layer id
+        layer_id = href_layer.split("@")[0].split("/")[-1]
+
+        # Build the full href using the correct layer_id and the API key
+        href_layer = f"type=xyz&url={SERVICE_URL}/{layer_id}@kermap/{{z}}/{{x}}/{{-y}}.png?kermap_token={self.user.api_key}"
+
+        # Prepare the layer
+        paid_layer = QgsRasterLayer(href_layer, title_layer, "wms")
+
+        # If the layer is valid, add it to the map
+        if paid_layer.isValid():
+            QgsProject().instance().addMapLayer(paid_layer)
+            self.iface.messageBar().pushMessage(
+                self.tr("Success"),
+                self.tr("Layer added - wait until loading is complete"),
+                level=Qgis.MessageLevel.Success,
+                duration=5,
+            )
         else:
-            self.iface.messageBar().pushMessage(self.tr("Warning"), self.tr("Invalid layer: unable to add it to the project"), level=1, duration=5)
+            self.iface.messageBar().pushMessage(
+                self.tr("Warning"),
+                self.tr("Invalid layer: unable to add it to the project"),
+                level=Qgis.MessageLevel.Warning,
+                duration=5,
+            )
+            QgsMessageLog.logMessage(
+                "Invalid layer: unable to add it to the project",
+                level=Qgis.MessageLevel.Warning,
+            )
 
-
-    def addFreeLayer(self):
-        # re-initializing the layer
+    def add_free_layer(self):
+        """
+        Add the free layer to the map
+        """
+        # Re-initialize the layer
         layer = XYZLayerModel()
+
+        # Prepare the full href and the title of the layer
         layer.href = "type=xyz&url=https://prod-data.nimbo.earth/mapcache-free/tms/1.0.0/latest@kermap/{z}/{x}/{-y}.png"
         layer.title = "June 2023 RGB"
-        flayer = QgsRasterLayer(layer.href, layer.title, "wms")
-        if flayer.isValid():
-            QgsProject().instance().addMapLayer(flayer)
-            self.iface.messageBar().pushMessage(self.tr("Success"), self.tr("Layer added - wait until loading is complete"), level=3, duration=5)
+
+        # Prepare the layer
+        free_layer = QgsRasterLayer(layer.href, layer.title, "wms")
+        if free_layer.isValid():
+            QgsProject().instance().addMapLayer(free_layer)
+            self.iface.messageBar().pushMessage(
+                self.tr("Success"),
+                self.tr("Layer added - wait until loading is complete"),
+                level=Qgis.MessageLevel.Success,
+                duration=5,
+            )
         else:
-            self.iface.messageBar().pushMessage(self.tr("Warning"), self.tr("Invalid layer: unable to add it to the project"), level=1, duration=5)
-            
-            
-    def add3DLayer(self):
-        # re-initializing the layer
-        layer = XYZLayerModel()
-        layer.href = "type=xyz&url=https://prod-data.nimbo.earth/tiles/terrain-dem/{z}/{x}/{y}?kermap_token=" + self.user.api_key
-        layer.title = "Nimbo Dem Layer"
-        flayer = QgsRasterLayer(layer.href, layer.title, "wms")
-        if flayer.isValid():
-            QgsProject().instance().addMapLayer(flayer)
-            self.iface.messageBar().pushMessage(self.tr("Success"), self.tr("Layer added - wait until loading is complete"), level=3, duration=5)
-        else:
-            self.iface.messageBar().pushMessage(self.tr("Warning"), self.tr("Invalid layer: unable to add it to the project"), level=1, duration=5)
-        
+            self.iface.messageBar().pushMessage(
+                self.tr("Warning"),
+                self.tr("Invalid layer: unable to add it to the project"),
+                level=Qgis.MessageLevel.Warning,
+                duration=5,
+            )
+            QgsMessageLog.logMessage(
+                "Invalid layer: unable to add it to the project",
+                level=Qgis.MessageLevel.Warning,
+            )

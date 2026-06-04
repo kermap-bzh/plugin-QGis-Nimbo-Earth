@@ -24,19 +24,26 @@
 
 import os
 
-from qgis.PyQt import QtGui, QtWidgets, uic
-from qgis.PyQt.QtCore import pyqtSignal
+from qgis.PyQt import QtWidgets, uic
+from qgis.PyQt.QtCore import QCoreApplication, Qt, pyqtSignal
+from qgis.PyQt.QtWidgets import QLabel
 
-FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'nimbo_earth_dockwidget_base.ui'))
+FORM_CLASS, _ = uic.loadUiType(
+    os.path.join(os.path.dirname(__file__), "nimbo_earth_dockwidget_base.ui")
+)
 
 
 class NimboEarthDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
+    """
+    Dock Widget
+    """
 
     closingPlugin = pyqtSignal()
 
     def __init__(self, parent=None):
-        """Constructor."""
+        """
+        Constructor
+        """
         super(NimboEarthDockWidget, self).__init__(parent)
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
@@ -44,8 +51,19 @@ class NimboEarthDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # http://doc.qt.io/qt-5/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
-        
+
+        # Add corner label directly in the init function because it's the only
+        # way to add a label in the top right corner of the dockwidget
+        self.corner_label = QLabel(
+            QCoreApplication.translate("NimboEarth", "Help"), self
+        )
+        self.corner_label.setObjectName("corner_label")
+
+        self.tabWidget_Main.setCornerWidget(self.corner_label, Qt.Corner.TopRightCorner)
 
     def closeEvent(self, event):
+        """
+        Close event
+        """
         self.closingPlugin.emit()
         event.accept()

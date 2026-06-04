@@ -5,11 +5,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Welcome to NimboEarth’s documentation! &#8212; NimboEarth 0.3 documentation</title>
+    <title>Welcome to Nimbo Earth Basemaps TMS Documentation! &#8212; Nimbo&#39;s Earth Basemaps 2.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/classic.css?v=514cf933" />
     
-    <script src="_static/documentation_options.js?v=2709fde1"></script>
+    <script src="_static/documentation_options.js?v=60dbed4a"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     
@@ -22,8 +22,8 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="nav-item nav-item-0"><a href="#">NimboEarth 0.3 documentation</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Welcome to NimboEarth’s documentation!</a></li> 
+        <li class="nav-item nav-item-0"><a href="#">Nimbo&#39;s Earth Basemaps 2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Welcome to Nimbo Earth Basemaps TMS Documentation!</a></li> 
       </ul>
     </div>  
 
@@ -32,41 +32,87 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <section id="welcome-to-nimboearth-s-documentation">
-<h1>Welcome to NimboEarth’s documentation!<a class="headerlink" href="#welcome-to-nimboearth-s-documentation" title="Link to this heading">¶</a></h1>
-<p>Contents:
-Concepts
-Running Nimbo Earth</p>
+  <section id="welcome-to-nimbo-earth-basemaps-tms-documentation">
+<h1>Welcome to Nimbo Earth Basemaps TMS Documentation!<a class="headerlink" href="#welcome-to-nimbo-earth-basemaps-tms-documentation" title="Link to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
 </section>
 <section id="concepts">
 <h1>Concepts<a class="headerlink" href="#concepts" title="Link to this heading">¶</a></h1>
-<p>Nimbo Earth provide you access to Nimbo tile map services.
-From it you can add natural, infrared, vegetation (NDVI) or radar raster layers.</p>
-<p># Open the plugin from within QGis
-# Login or use your api key
-# Select a map to add
-# Add it to your project</p>
+<p>Nimbo Earth Basemaps is an innovative Earth observation service providing cloud-free, homogenous mosaics of the world’s entire landmass as captured by satellite imagery. Mosaics are updated every single month and served in WMS/WMTS formats.</p>
+<p>The plugin provides users with 4 distinct data layers every month:</p>
+<ul class="simple">
+<li><p><strong>Natural colors (RGB)</strong> at 10m resolution.</p></li>
+<li><p><strong>Infrared (NIR)</strong> at 10m resolution.</p></li>
+<li><p><strong>NDVI (vegetation health index)</strong> at 10m resolution.</p></li>
+<li><p><strong>HD Natural colors (RGB)</strong> at 2.5m resolution (AI enhanced through in-house algorithms).</p></li>
+</ul>
+<section id="data-availability-timeline">
+<h2>Data Availability Timeline<a class="headerlink" href="#data-availability-timeline" title="Link to this heading">¶</a></h2>
+<p><strong>For all 10m resolution layers (RGB, NIR, NDVI):</strong></p>
+<ul class="simple">
+<li><p><strong>From October 2019 to present</strong>: Europe, Northern Africa, and Middle East.</p></li>
+<li><p><strong>From March 2022 to present</strong>: All of the above + the USA.</p></li>
+<li><p><strong>From February 2023 to present</strong>: Full Global coverage.</p></li>
+</ul>
+<p><strong>For the HD Natural colors (RGB) at 2.5m:</strong></p>
+<ul class="simple">
+<li><p><strong>From May 2025 to present</strong>: Full Global coverage.</p></li>
+</ul>
+</section>
 </section>
 <section id="running-nimbo-earth">
 <h1>Running Nimbo Earth<a class="headerlink" href="#running-nimbo-earth" title="Link to this heading">¶</a></h1>
-<p>You can open the plugin from the icon in toolbar or from the Web menu
-When you open plugin a dockwidget appears on the right side of QGis.
-The first window you will see has text fields.
-Either you connect using your nimbo account email and password
-or you can directly paste your api key.</p>
-<p>Once your login or api key validation succeed, you will access to the second panel.
-In this panel you will choose a layer to import.
-You have two choices :
-- you can select composition, year and month from the comboboxes
-- you can directly select the layer from the list (you can only select one layer at a time)</p>
-<p>Remember that adding a layer will consume geocredits from your nimbo account
-you can consult your geocredits balance from your dashboard on <a class="reference external" href="https://maps.nimbo.earth/myNimbo/dashboard">https://maps.nimbo.earth/myNimbo/dashboard</a>
-(if you are logged in).</p>
+<p>You can launch the plugin either by clicking its icon in the QGIS toolbar or via the <strong>Web</strong> menu.
+Once opened, the <strong>Welcome to Nimbo Earth Basemaps TMS</strong> dock widget will appear on the right side of the QGIS interface.</p>
+<section id="api-key-validation-tab">
+<h2>1. API Key Validation Tab<a class="headerlink" href="#api-key-validation-tab" title="Link to this heading">¶</a></h2>
+<p>When you first open the plugin, you will interact with the <strong>API key validation</strong> tab. This interface is split into three main sections:</p>
+<ul class="simple">
+<li><p><strong>Try our cloud-free basemap service</strong>: Allows you to instantly test the service by loading a free sample layer (<strong>June 2023 | RGB</strong>) without requiring an account.</p></li>
+<li><p><strong>Create your account</strong>: If you don’t have an account yet, use the <strong>Sign up to Nimbo</strong> or <strong>See offers</strong> buttons to register and access the monthly tiers.</p></li>
+<li><p><strong>Already have a Nimbo account?</strong>: Authenticate directly using one of two methods:</p>
+<ul>
+<li><p>Enter your <strong>E-mail</strong> and <strong>Password</strong> then click <strong>Login</strong> to securely fetch your token.</p></li>
+<li><p>Paste your personal <strong>API key</strong> extracted from your online dashboard, then click <strong>Validate your key</strong>.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="layer-selector-tab">
+<h2>2. Layer Selector Tab<a class="headerlink" href="#layer-selector-tab" title="Link to this heading">¶</a></h2>
+<p>Once authenticated, the <strong>Layer selector</strong> tab becomes active and accessible.</p>
+<ul class="simple">
+<li><p><strong>Geocredits Tracking</strong>: The top bar displays your remaining balance of <strong>Geocredits</strong>.</p></li>
+<li><p><strong>Parameters Filtering</strong>: You can easily filter the extensive catalog of monthly basemaps using three dropdown comboboxes:</p>
+<ul>
+<li><p><strong>Compositions</strong>: Filter by image type (All, RGB, NDVI, Infrared, etc.).</p></li>
+<li><p><strong>Months</strong>: Filter by a specific month.</p></li>
+<li><p><strong>Years</strong>: Filter by a specific year.</p></li>
+</ul>
+</li>
+<li><p><strong>Adding Layers</strong>: Select a layer from the reverse-chronological list view and click the <strong>Add layer</strong> button to load it into your current QGIS project workspace.</p></li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Please note that each layer you enable (i.e., check/select) will consume credits from your balance.
+You can monitor your detailed data consumption from your personal online dashboard.</p>
+</div>
+</section>
+<section id="professional-plans">
+<h2>Professional Plans<a class="headerlink" href="#professional-plans" title="Link to this heading">¶</a></h2>
+<p>For advanced users requiring custom integrations, multispectral basemap downloads, or real-time environmental monitoring, use the <strong>Discover offers</strong> button under the <strong>Professional plans</strong> section to learn more about advanced geospatial options.</p>
+</section>
+</section>
+<section id="support-links">
+<h1>Support &amp; Links<a class="headerlink" href="#support-links" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Need assistance? Click the <strong>Support</strong> link in the top-right corner of the window to access our support form.</p></li>
+<li><p>Learn more about our ecosystem using the <strong>About Nimbo</strong> and <strong>About Kermap</strong> links located at the bottom of the plugin window.</p></li>
+</ul>
 </section>
 <section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">¶</a></h1>
+<h1>Indices and Tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">¶</a></h1>
 <ul class="simple">
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
@@ -82,10 +128,19 @@ you can consult your geocredits balance from your dashboard on <a class="referen
   <div>
     <h3><a href="#">Table of Contents</a></h3>
     <ul>
-<li><a class="reference internal" href="#">Welcome to NimboEarth’s documentation!</a></li>
-<li><a class="reference internal" href="#concepts">Concepts</a></li>
-<li><a class="reference internal" href="#running-nimbo-earth">Running Nimbo Earth</a></li>
-<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+<li><a class="reference internal" href="#">Welcome to Nimbo Earth Basemaps TMS Documentation!</a></li>
+<li><a class="reference internal" href="#concepts">Concepts</a><ul>
+<li><a class="reference internal" href="#data-availability-timeline">Data Availability Timeline</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#running-nimbo-earth">Running Nimbo Earth</a><ul>
+<li><a class="reference internal" href="#api-key-validation-tab">1. API Key Validation Tab</a></li>
+<li><a class="reference internal" href="#layer-selector-tab">2. Layer Selector Tab</a></li>
+<li><a class="reference internal" href="#professional-plans">Professional Plans</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#support-links">Support &amp; Links</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and Tables</a></li>
 </ul>
 
   </div>
@@ -116,12 +171,12 @@ you can consult your geocredits balance from your dashboard on <a class="referen
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
-        <li class="nav-item nav-item-0"><a href="#">NimboEarth 0.3 documentation</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Welcome to NimboEarth’s documentation!</a></li> 
+        <li class="nav-item nav-item-0"><a href="#">Nimbo&#39;s Earth Basemaps 2.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Welcome to Nimbo Earth Basemaps TMS Documentation!</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-    &#169; Copyright 2022, Kermap.
+    &#169; Copyright 2026, Kermap.
       Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
     </div>
   </body>
